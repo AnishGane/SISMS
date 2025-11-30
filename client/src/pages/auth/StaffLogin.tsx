@@ -34,7 +34,7 @@ const StaffLogin = () => {
               <Link to={"/auth/admin/login"}
                 className="text-blue-500 hover:underline"
               >
-                Login here staff
+                Login here 
               </Link>
             </p>
           </>
