@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@layer utilities {
+  #triangle-topleft {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-top: 90px solid #155dfc;
+    border-right: 100px solid transparent;
+  }
+
+  #triangle-topright {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-top: 100px solid #155dfc;
+    border-left: 100px solid transparent;
+  }
+
+  #triangle-bottomleft {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-bottom: 100px solid #155dfc;
+    border-right: 100px solid transparent;
+  }
+
+  #triangle-bottomright {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-bottom: 100px solid #155dfc;
+    border-left: 100px solid transparent;
+  }
+}
