@@ -11,11 +11,16 @@ import OTPModel from "../../models/otp.model.js";
 
 import { generateOTP } from "../../utils/generateOTP.js";
 import { sendOtpEmail } from "../../utils/emailSender.js";
-// import { sendOTPEmail } from "../../../client/src/utils/sendEmail.ts"; // ✅ MISSING IMPORT FIXED
 
 const OTP_EXPIRES_MIN = Number(process.env.OTP_EXPIRES_MIN) || 15;
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret";
 const BCRYPT_SALT_ROUNDS = 10;
+
+interface ResetTokenPayload extends jwt.JwtPayload {
+  purpose: string;
+  email: string;
+  role: string;
+}
 
 const getUserModelByRole = (role: string) => {
   if (role === "admin") return AdminModel;
@@ -23,19 +28,13 @@ const getUserModelByRole = (role: string) => {
   return null;
 };
 
-// -------------------------------------
 // ADMIN LOGIN
-// -------------------------------------
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !validator.isEmail(email)) {
-      return res.status(400).json({ message: "Invalid email" });
-    }
-
-    if (!password) {
-      return res.status(400).json({ message: "Password is required" });
+    if (!email || !validator.isEmail(email) || !password) {
+      return res.status(400).json({ message: "Invalid Credentials" });
     }
 
     const admin = await AdminModel.findOne({ email });
@@ -45,7 +44,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Incorrect password" });
+      return res.status(400).json({ message: "Incorrect Credentials" });
     }
 
     if (!process.env.JWT_SECRET) {
@@ -73,19 +72,13 @@ export const loginAdmin = async (req: Request, res: Response) => {
   }
 };
 
-// -------------------------------------
 // STAFF LOGIN
-// -------------------------------------
 export const loginStaff = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !validator.isEmail(email)) {
-      return res.status(400).json({ message: "Invalid email" });
-    }
-
-    if (!password) {
-      return res.status(400).json({ message: "Password is required" });
+    if (!email || !validator.isEmail(email) || !password) {
+      return res.status(400).json({ message: "Invalid Credentials" });
     }
 
     const staff = await StaffModel.findOne({ email });
@@ -95,7 +88,7 @@ export const loginStaff = async (req: Request, res: Response) => {
 
     const isMatch = await bcrypt.compare(password, staff.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Incorrect password" });
+      return res.status(400).json({ message: "Incorrect Credentials" });
     }
 
     if (!process.env.JWT_SECRET) {
@@ -123,9 +116,7 @@ export const loginStaff = async (req: Request, res: Response) => {
   }
 };
 
-// -------------------------------------
 // REGISTER ADMIN
-// -------------------------------------
 export const registerAdmin = async (req: Request, res: Response) => {
   try {
     const { name, email, password, storeName, storeAddress, avatar, phone } =
@@ -197,7 +188,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       // for security, respond with success message even if email not found
       return res
         .status(200)
-        .json({ message: "If that email exists, an OTP has been sent." });
+        .json({ message: "An OTP has been sent to your email." });
     }
 
     // generate OTP
@@ -274,12 +265,6 @@ export const verifyOTP = async (req: Request, res: Response) => {
   }
 };
 
-interface ResetTokenPayload extends jwt.JwtPayload {
-  purpose: string;
-  email: string;
-  role: string;
-}
-
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token, newPassword } = req.body;
@@ -309,7 +294,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const hashed = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
-    user.password = hashed; // adapt if your model uses different field names or pre-save hooks
+    user.password = hashed;
     await user.save();
 
     return res.status(200).json({ message: "Password updated successfully" });
