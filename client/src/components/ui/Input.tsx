@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface InputProps {
   label: string;
@@ -8,6 +9,8 @@ interface InputProps {
   placeholder?: string;
   required?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showForgotPassword?: boolean;
+  forgotPasswordPath?: string;
 }
 
 const Input = ({
@@ -16,7 +19,9 @@ const Input = ({
   type = "text",
   placeholder,
   required = true,
-  onChange
+  onChange,
+  showForgotPassword = false,
+  forgotPasswordPath = "#"
 }: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -25,13 +30,23 @@ const Input = ({
 
   return (
     <div className="relative">
+      {/* Label */}
       <label
         htmlFor={name}
-        className="block text-gray-700 mb-2 text-sm font-medium"
+        className="flex justify-between items-center text-gray-700 mb-2 text-sm font-medium"
       >
-        {label} {required && "*"}
+        <span>{label} {required && "*"}</span>
+
+        {showForgotPassword && name === "password" && (
+          <Link to={forgotPasswordPath}
+            className="text-blue-600 hover:underline text-xs"
+          >
+            Forgot Password?
+          </Link>
+        )}
       </label>
 
+      {/* Input */}
       <input
         type={inputType}
         name={name}
@@ -59,5 +74,6 @@ const Input = ({
     </div>
   );
 };
+
 
 export default Input;

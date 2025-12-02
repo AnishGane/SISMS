@@ -17,6 +17,8 @@ interface AuthFormProps {
   buttonText: string;
   bottomLinks?: React.ReactNode;
   onSubmit?: (e: React.FormEvent) => void;
+  showForgotPassword?: boolean;
+  forgotPasswordPath?: string;
 }
 
 const AuthForm = ({
@@ -27,6 +29,9 @@ const AuthForm = ({
   buttonText,
   bottomLinks,
   onSubmit,
+  showForgotPassword,
+  forgotPasswordPath,
+  
 }: AuthFormProps) => {
   const {handleChange} = useAuth();
   return (
@@ -48,8 +53,11 @@ const AuthForm = ({
             type={field.type}
             placeholder={field.placeholder}
             onChange={handleChange}
+            showForgotPassword={showForgotPassword}
+            forgotPasswordPath={forgotPasswordPath}
            required
           />
+          
         ))}
 
         {/* Store section in 2-column grid */}

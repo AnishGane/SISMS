@@ -19,8 +19,8 @@ const AdminRegister = () => {
           { label: "Phone", name: "phone", type: "tel", placeholder: "98xxxxxxxx" },
         ]}
         storeFields={[
-          { label: "Store Name", name: "storeName", type: "text" },
-          { label: "Store Address", name: "storeAddress", type: "text" },
+          { label: "Store Name", name: "storeName", type: "text", placeholder: "Store Name" },
+          { label: "Store Address", name: "storeAddress", type: "text", placeholder: "Store Address" },
         ]}
         onSubmit={registerAdmin}
         bottomLinks={
