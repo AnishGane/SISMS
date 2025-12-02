@@ -2,9 +2,14 @@ import AuthLayout from "../../layouts/AuthLayout";
 import AuthForm from "../../components/auth/AuthForm";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useEffect } from "react";
 
 const AdminLogin = () => {
-  const { loginAdmin, loading, error } = useAuth();
+  const { loginAdmin,getLoginfromURL,forgotPasswordLink, loading, error } = useAuth();
+  useEffect(() => {
+    getLoginfromURL();
+  }, []);
+
   return (
     <AuthLayout>
       <AuthForm
@@ -25,6 +30,8 @@ const AdminLogin = () => {
             placeholder: "********",
           },
         ]}
+        showForgotPassword={forgotPasswordLink}
+        forgotPasswordPath="/auth/admin/forgot-password"
         onSubmit={loginAdmin}
         bottomLinks={
           <>

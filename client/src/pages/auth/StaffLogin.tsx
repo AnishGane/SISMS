@@ -2,9 +2,15 @@ import AuthLayout from "../../layouts/AuthLayout";
 import AuthForm from "../../components/auth/AuthForm";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useEffect } from "react";
 
 const StaffLogin = () => {
-  const {staffLogin, loading, error} = useAuth();
+  const {staffLogin, loading, error,forgotPasswordLink, getLoginfromURL} = useAuth();
+
+  useEffect(() => {
+    getLoginfromURL();
+  }, []);
+
   return (
     <AuthLayout>
       <AuthForm
@@ -26,7 +32,8 @@ const StaffLogin = () => {
             placeholder: "********",
           },
         ]}
-
+        showForgotPassword={forgotPasswordLink}
+        forgotPasswordPath="/auth/staff/forgot-password"
         bottomLinks={
           <>
             <p>
@@ -34,7 +41,7 @@ const StaffLogin = () => {
               <Link to={"/auth/admin/login"}
                 className="text-blue-500 hover:underline"
               >
-                Login here staff
+                Login here 
               </Link>
             </p>
           </>

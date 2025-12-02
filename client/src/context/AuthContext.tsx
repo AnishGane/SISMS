@@ -17,6 +17,7 @@ interface AuthContextType {
   user: any;
   loading: boolean;
   error: string | null;
+  forgotPasswordLink: boolean;
 
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement>
@@ -27,6 +28,8 @@ interface AuthContextType {
   registerAdmin: (e: React.FormEvent) => Promise<void>;
   loginAdmin: (e: React.FormEvent) => Promise<void>;
   staffLogin: (e: React.FormEvent) => Promise<void>;
+  // for showing forgot password link
+  getLoginfromURL: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -36,7 +39,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [forgotPasswordLink, setForgotPasswordLink] = useState<boolean>(false);
 //   const navigate = useNavigate();
+
+const getLoginfromURL = () => {
+  const loginURL = window.location.pathname;
+  if (loginURL.includes("login")) {
+    setForgotPasswordLink(true);
+  } else {
+    setForgotPasswordLink(false);
+  }
+};
+
 
   // ✔ Update form data
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,11 +151,13 @@ const staffLogin = async (e: React.FormEvent) => {
         user,
         loading,
         error,
+        forgotPasswordLink,
         handleChange,
         resetForm,
         registerAdmin,
         loginAdmin,
-        staffLogin
+        staffLogin,
+        getLoginfromURL,
       }}
     >
       {children}
