@@ -226,9 +226,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       expiryMinutes: OTP_EXPIRES_MIN,
     });
 
-    return res
-      .status(200)
-      .json({ message: "If that email exists, an OTP has been sent." });
+    return res.status(200).json({ message: "OTP has been sent to your email" });
   } catch (err) {
     console.error("forgotPassword err:", err);
     return res.status(500).json({ message: "Server error" });
@@ -282,7 +280,6 @@ interface ResetTokenPayload extends jwt.JwtPayload {
   role: string;
 }
 
-
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token, newPassword } = req.body;
@@ -292,7 +289,7 @@ export const resetPassword = async (req: Request, res: Response) => {
         .json({ message: "Token and new password required" });
 
     // verify JWT
-    let payload : ResetTokenPayload;
+    let payload: ResetTokenPayload;
     try {
       payload = jwt.verify(token, JWT_SECRET) as ResetTokenPayload;
     } catch (e) {
