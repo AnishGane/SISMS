@@ -18,7 +18,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
         radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
     }}
   />
-        <div className="z-30 px-4 sm:px-10 py-2 flex flex-col justify-between container h-auto mx-auto mt-6   overflow-y-auto">
+        <div className="z-30 px-4 sm:px-10 py-2 flex flex-col justify-between container h-auto mx-auto mt-6 overflow-y-auto">
           {/* Optional small logo/banner */}
           <div className="mb-8 w-16">
             <img

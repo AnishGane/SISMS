@@ -5,5 +5,8 @@ export const API_PATHS = {
       LOGIN_ADMIN: '/api/auth/login-admin',
       REGISTER_ADMIN: '/api/auth/register-admin',
       LOGIN_STAFF: '/api/auth/login-staff',
+      FORGOT_PASSWORD: '/api/auth/:role/forgot-password',
+      VERIFY_OTP: '/api/auth/:role/verify-otp',
+      RESET_PASSWORD: '/api/auth/:role/reset-password',
     },
 }

@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState } from "react";
 import { API_PATHS } from "../utils/apiPath";
 import axiosInstance from "../utils/axiosInstance";
-// import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface FormData {
   name?: string;
@@ -16,8 +17,12 @@ interface AuthContextType {
   formData: FormData;
   user: any;
   loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
   error: string | null;
   forgotPasswordLink: boolean;
+  navigate: any;
+  location: any;
 
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement>
@@ -40,7 +45,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [forgotPasswordLink, setForgotPasswordLink] = useState<boolean>(false);
-//   const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+
 
 const getLoginfromURL = () => {
   const loginURL = window.location.pathname;
@@ -51,8 +58,7 @@ const getLoginfromURL = () => {
   }
 };
 
-
-  // ✔ Update form data
+  // Update form data
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -77,11 +83,10 @@ const getLoginfromURL = () => {
         formData
       );
 
-    // setUser(res.data.admin);
-    console.log(res.data.message);
+      console.log(res.data.message);
       resetForm();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed");
+      toast.error(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -102,8 +107,8 @@ const getLoginfromURL = () => {
       const {token, admin} = res.data;
       if(token) {
         localStorage.setItem('token', token);
-        // localStorage.setItem('admin', JSON.stringify(admin));
         localStorage.setItem('username', admin.name);
+        toast.success("Login successful");
       }
 
       if(admin){
@@ -111,7 +116,7 @@ const getLoginfromURL = () => {
       }
       resetForm();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      toast.error(err.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -129,8 +134,8 @@ const staffLogin = async (e: React.FormEvent) => {
         const {token, staff} = res.data;
         if(token){
             localStorage.setItem('token', token);
-            // localStorage.setItem('staff', JSON.stringify(staff));
             localStorage.setItem('staff_username', staff.name);
+            toast.success("Login successful");
         }
         if(staff){
             setUser(staff);
@@ -138,7 +143,7 @@ const staffLogin = async (e: React.FormEvent) => {
         resetForm();
         // navigate('/admin/register');
     } catch (error: any) {
-        setError(error.response?.data?.message || "Login failed");
+        toast.error(error.response?.data?.message);
     } finally {
         setLoading(false);
     }
@@ -150,8 +155,12 @@ const staffLogin = async (e: React.FormEvent) => {
         formData,
         user,
         loading,
+        setLoading,
+        setError,
         error,
         forgotPasswordLink,
+        navigate,
+        location,
         handleChange,
         resetForm,
         registerAdmin,
