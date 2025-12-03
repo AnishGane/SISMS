@@ -108,12 +108,14 @@ const getLoginfromURL = () => {
       if(token) {
         localStorage.setItem('token', token);
         localStorage.setItem('username', admin.name);
+        localStorage.setItem('role', "admin");
         toast.success("Login successful");
       }
 
       if(admin){
           setUser(admin);
       }
+      navigate("/admin/dashboard");
       resetForm();
     } catch (err: any) {
       toast.error(err.response?.data?.message);
@@ -135,6 +137,7 @@ const staffLogin = async (e: React.FormEvent) => {
         if(token){
             localStorage.setItem('token', token);
             localStorage.setItem('staff_username', staff.name);
+            localStorage.setItem('role', "staff");
             toast.success("Login successful");
         }
         if(staff){
