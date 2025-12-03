@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 interface AuthLayoutProps {
   children?: ReactNode;
@@ -6,19 +6,19 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <div className="flex h-screen w-full bg-white overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-white">
       {/* Left side: form/content */}
-      <div className=" relative flex-1 flex">
-  {/* Dreamy Sky Pink Glow */}
-  <div
-    className="absolute inset-0 z-0"
-    style={{
-      backgroundImage: `
+      <div className="relative flex flex-1">
+        {/* Dreamy Sky Pink Glow */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `
         radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 60%),
         radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
-    }}
-  />
-        <div className="z-30 px-4 sm:px-10 py-2 flex flex-col justify-between container h-auto mx-auto mt-6 overflow-y-auto">
+          }}
+        />
+        <div className="z-30 container mx-auto mt-6 flex h-auto flex-col justify-between overflow-y-auto px-4 py-2 sm:px-10">
           {/* Optional small logo/banner */}
           <div className="mb-8 w-16">
             <img
@@ -26,17 +26,16 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
               alt="Auth Logo"
               loading="lazy"
               title="Smart Inventory & Sales Management System"
-              className="w-full h-full object-contain"
+              className="h-full w-full object-contain"
             />
           </div>
 
-          <div className="w-full max-w-lg m-auto">{children}</div>
-
+          <div className="m-auto w-full max-w-lg">{children}</div>
         </div>
       </div>
 
       {/* Right side: decorative image */}
-      <div className=" relative flex-1/3 hidden md:flex">
+      <div className="relative hidden flex-1/3 md:flex">
         <div id="triangle-topleft"></div>
         <div id="triangle-topright"></div>
         <div id="triangle-bottomleft"></div>
@@ -45,7 +44,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           src="/images/Auth_right_image.jpeg"
           alt="Auth Banner"
           loading="lazy"
-          className="w-full h-full object-cover "
+          className="h-full w-full object-cover"
         />
       </div>
     </div>

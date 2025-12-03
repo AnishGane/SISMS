@@ -1,8 +1,12 @@
+import WelcomeHeader from '../../components/WelcomeHeader';
+import AdminLayout from '../../layouts/AdminLayout';
 
 const AdminDashboard = () => {
   return (
-    <div>AdminDashboard</div>
-  )
-}
+    <AdminLayout>
+      <WelcomeHeader text="Admin Dashboard" subText="Welcome to the admin dashboard" />
+    </AdminLayout>
+  );
+};
 
-export default AdminDashboard
+export default AdminDashboard;

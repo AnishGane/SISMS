@@ -1,6 +1,7 @@
 import React from "react";
 import Input from "../ui/Input";
 import { useAuth } from "../../context/AuthContext";
+import Button from "../ui/Button";
 
 type Field = {
   label: string;
@@ -77,12 +78,13 @@ const AuthForm = ({
           </div>
         )}
 
-        <button
+        {/* <button
           type="submit"
           className="w-full py-2 btn-linear text-white cursor-pointer transition-colors"
         >
           {buttonText}
-        </button>
+        </button> */}
+        <Button text={buttonText} variant="primary" />
       </form>
 
       {bottomLinks && (

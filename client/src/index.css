@@ -48,7 +48,7 @@
 
   /* Improved button */
   .btn-linear {
-    @apply bg-linear-to-r from-indigo-500 via-indigo-600 to-purple-500 text-white font-medium rounded-md transition duration-200;
+    @apply bg-linear-to-r from-indigo-500 via-indigo-600 to-purple-500;
   }
 
   .btn-linear:hover {
