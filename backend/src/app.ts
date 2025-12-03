@@ -17,6 +17,7 @@ import authRoutes from "./routes/shared/auth.route.js";
 // admin routes
 // import adminRoutes from "./routes/admin/admin.routes.js";
 import staffRoutes from "./routes/admin/staff.route.js";
+import dashboardRoute from "./routes/admin/dashboard.route.js";
 // import suppliersRoutes from "./routes/admin/suppliers.routes.js";
 // import purchasesRoutes from "./routes/admin/purchases.routes.js";
 // import analyticsRoutes from "./routes/admin/analytics.routes.js";
@@ -33,6 +34,7 @@ app.use(express.json());
 
 // route registration
 app.use("/api/auth", authRoutes);
+app.use("/api/admin/dashboard", dashboardRoute);
 
 // shared
 // app.use("/api/products", productRoutes);
