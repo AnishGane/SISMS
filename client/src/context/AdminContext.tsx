@@ -40,9 +40,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-//   useEffect(() => {
-//     fetchDashboardData();
-//   }, []);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   return (
     <AdminContext.Provider value={{ dashboardData, loading, error, fetchDashboardData }}>
