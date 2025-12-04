@@ -34,7 +34,7 @@ axiosInstance.interceptors.response.use(
     if (error.response) {
       if (error.response.status === 401) {
         // Redirect to Login Page
-        window.location.href = '/login';
+        window.location.href = '/auth/admin/login';
       } else if (error.response.status === 500) {
         alert('500 says: ' + error.response.data.message);
       }

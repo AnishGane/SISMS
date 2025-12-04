@@ -1,17 +1,26 @@
+import type { JSX } from 'react/jsx-runtime';
+
 type ButtonProps = {
-  icon?: any;
-  text: string;
+  icon?: JSX.Element;
+  text?: string;
   variant?: 'primary' | 'secondary';
+  onClick?: () => Promise<void> | void;
+  className?: string;
 };
-const Button = ({ icon, text, variant = 'primary' }: ButtonProps) => {
+const Button = ({ icon, text, variant = 'primary', onClick, className }: ButtonProps) => {
   const base =
-    'w-full py-2 cursor-pointer rounded-md transition-colors font-medium duration-200 flex gap-2 items-center justify-center';
+    ' p-2 cursor-pointer transition-colors font-medium duration-200 flex gap-2 items-center justify-center';
   const variantcn = {
-    primary: 'btn-linear text-white',
-    secondary: 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 border border-neutral-400',
+    primary: 'btn-linear text-white w-full rounded-md',
+    secondary: 'bg-base-200 text-base-content hover:bg-base-300/40 border border-base-content',
   };
   return (
-    <button type="submit" className={`${base} ${variantcn[variant]}`}>
+    <button
+      onClick={onClick}
+      type="submit"
+      title={text}
+      className={`${base} ${className} ${variantcn[variant]}`}
+    >
       {icon} {text}
     </button>
   );

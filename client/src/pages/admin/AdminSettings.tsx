@@ -1,9 +1,34 @@
-import AdminLayout from "../../layouts/AdminLayout"
+import { THEMES } from '../../constants';
+import useTheme from '../../hooks/useTheme';
+import AdminLayout from '../../layouts/AdminLayout';
 
 const AdminSettings = () => {
+  const { theme, setTheme } = useTheme();
   return (
-    <AdminLayout>AdminSettings</AdminLayout>
-  )
-}
+    <AdminLayout>
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8">
+        {THEMES.map((t) => (
+          <button
+            key={t}
+            className={`group flex flex-col items-center gap-1.5 rounded-lg p-2 transition-colors ${theme === t ? 'bg-base-200' : 'hover:bg-base-200/50'} `}
+            onClick={() => setTheme(t)}
+          >
+            <div className="relative h-8 w-full overflow-hidden rounded-md" data-theme={t}>
+              <div className="absolute inset-0 grid grid-cols-4 gap-px p-1">
+                <div className="bg-primary rounded"></div>
+                <div className="bg-secondary rounded"></div>
+                <div className="bg-accent rounded"></div>
+                <div className="bg-neutral rounded"></div>
+              </div>
+            </div>
+            <span className="w-full truncate text-center text-[11px] font-medium">
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </span>
+          </button>
+        ))}
+      </div>
+    </AdminLayout>
+  );
+};
 
-export default AdminSettings
+export default AdminSettings;

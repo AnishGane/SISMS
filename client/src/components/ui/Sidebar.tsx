@@ -33,16 +33,15 @@ const Sidebar = ({ role = 'admin' }) => {
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen bg-gray-900 text-gray-200 transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} `}
+      className={`bg-base-200 text-base-content fixed top-0 left-0 h-screen shadow-lg transition-all duration-300 ${
+        collapsed ? 'w-16' : 'w-64'
+      }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-700 px-3 py-4">
-        {!collapsed && <h1 className="text-xl font-semibold tracking-wide">SISMS</h1>}
+      <div className="border-base-300 flex items-center justify-between border-b px-3 py-4">
+        {!collapsed && <h1 className="text-xl font-bold tracking-wide">SISMS</h1>}
 
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="cursor-pointer rounded p-1 transition hover:bg-gray-700"
-        >
+        <button onClick={() => setCollapsed(!collapsed)} className="btn btn-ghost btn-sm p-1">
           {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
       </div>
@@ -54,7 +53,9 @@ const Sidebar = ({ role = 'admin' }) => {
             key={item.name}
             to={item.path}
             className={({ isActive }) =>
-              `mx-2 my-1 flex cursor-pointer items-center gap-3 rounded-md px-4 py-3 transition-colors duration-200 ${isActive ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800'} `
+              `mx-2 my-1 flex items-center gap-3 rounded-lg px-4 py-3 transition-colors duration-200 ${
+                isActive ? 'bg-primary text-primary-content' : 'hover:bg-base-300 text-base-content'
+              }`
             }
           >
             <span>{item.icon}</span>
@@ -64,7 +65,7 @@ const Sidebar = ({ role = 'admin' }) => {
 
         {/* Logout */}
         <button
-          className={`mx-2 my-6 flex w-[calc(100%-1rem)] cursor-pointer items-center gap-3 rounded-md px-4 py-3 text-gray-300 transition hover:bg-red-500 hover:text-white`}
+          className={`bg-error text-error-content mx-2 my-6 flex w-[calc(100%-1rem)] cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition hover:brightness-110`}
           onClick={() => {
             localStorage.clear();
             window.location.href = role === 'admin' ? '/auth/admin/login' : '/auth/staff/login';
