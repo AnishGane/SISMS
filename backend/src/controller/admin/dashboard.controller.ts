@@ -3,7 +3,7 @@ import StaffModel from "../../models/staff.model.js";
 import ProductModel from "../../models/product.model.js";
 import OrderModel from "../../models/order.model.js";
 
-// GET /admin/dashboard
+// GET /admin/dashboard/cards Data
 export const getAdminDashboardData = async (req: Request, res: Response) => {
   try {
     const storeId = req.user.store || req.user._id; // admin = store owner
@@ -58,6 +58,7 @@ export const getAdminDashboardData = async (req: Request, res: Response) => {
   }
 };
 
+// For bar chart in admin dashboard
 export const getStockByCategory = async (req: Request, res: Response) => {
   try {
     const storeId = req.user.store || req.user._id;

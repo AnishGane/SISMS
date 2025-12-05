@@ -9,7 +9,7 @@ dotenv.config();
 // shared routes
 
 import authRoutes from "./routes/shared/auth.route.js";
-// import productRoutes from "./routes/shared/products.routes.js";
+import productRoutes from "./routes/shared/products.route.js";
 // import orderRoutes from "./routes/shared/orders.routes.js";
 // import searchRoutes from "./routes/shared/search.routes.js";
 // import notificationRoutes from "./routes/shared/notifications.routes.js";
@@ -37,7 +37,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin/dashboard", dashboardRoute);
 
 // shared
-// app.use("/api/products", productRoutes);
+app.use("/api/products", productRoutes);
 // app.use("/api/orders", orderRoutes);
 // app.use("/api/search", searchRoutes);
 // app.use("/api/notifications", notificationRoutes);

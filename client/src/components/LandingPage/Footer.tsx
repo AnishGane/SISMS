@@ -38,11 +38,14 @@ const Footer = () => {
       <div className="flex flex-col">
         <div className="mt-4 grid gap-4 py-8 md:grid-cols-3 lg:grid-cols-6">
           {footerData.map((item) => (
-            <div key={item.title} className="text-left text-[#535862] mx-auto">
+            <div key={item.title} className="mx-auto text-left text-[#535862]">
               <p className="font-medium">{item.title}</p>
               <div className="mt-4 flex w-fit cursor-pointer flex-col gap-2 text-[19px] font-medium">
                 {item.data.map((data) => (
-                  <p key={data} className="group w-fit cursor-pointer transition-all duration-200">
+                  <p
+                    key={data}
+                    className="group hover:text-base-content w-fit cursor-pointer transition-all duration-200"
+                  >
                     {data}
                     <hr className="-mt-1 w-0 transition-all duration-200 group-hover:w-full" />
                   </p>
@@ -52,7 +55,9 @@ const Footer = () => {
           ))}
         </div>
         <div className="flex w-full items-center justify-between border-t border-gray-600/50 py-8">
-          <h1 className="text-xl font-semibold text-neutral-800">Smart Inventory & Sales Management System</h1>
+          <h1 className="text-xl font-semibold text-neutral-800">
+            Smart Inventory & Sales Management System
+          </h1>
           <p className="tracking-wide text-neutral-600">© 2082 SISMS. All rights reserved.</p>
         </div>
       </div>

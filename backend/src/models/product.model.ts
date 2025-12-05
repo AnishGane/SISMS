@@ -21,7 +21,7 @@ const ProductSchema = new mongoose.Schema(
     leadTimeDays: { type: Number, default: 7 },
 
     // location & supplier
-    location: { type: String }, // e.g., Rack A2
+    location: { type: String, default: "" }, // e.g., Rack A2
     supplier: {
       id: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" },
       name: String,
