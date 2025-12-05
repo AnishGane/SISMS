@@ -28,7 +28,7 @@ const Hero = () => {
 
       <div className="image-container mt-20 rounded-t-[40px] bg-[#F3F3F3] px-1 pt-1 shadow-md ring-2 ring-neutral-300">
         <div className="overflow-hidden rounded-t-[36px] bg-neutral-300/60 px-1 pt-1 ring-1 ring-neutral-400">
-          <img src="/images/dash.png" className="rounded-t-4xl" alt="dash" />
+          <img src="/images/dash1.png" className="rounded-t-4xl" alt="dash" />
         </div>
       </div>
       {open && <VideoModal open={open} setOpen={setOpen} />}

@@ -6,9 +6,9 @@ import {
   RefreshCcw,
   Users,
 } from 'lucide-react';
-import { useAdmin } from '../../context/AdminContext';
-import Heading from '../Heading';
-import Button from '../ui/Button';
+import { useAdmin } from '../../../context/AdminContext';
+import Heading from '../../Heading';
+import Button from '../../ui/Button';
 import type { JSX } from 'react';
 
 const SummaryCards = () => {
@@ -18,7 +18,7 @@ const SummaryCards = () => {
   if (error) return <p className="text-error font-medium">{error}</p>;
 
   return (
-    <div className="bg-base-200 mt-8 rounded-xl p-4 shadow">
+    <div className="bg-base-200/50 mt-8 rounded-xl p-4 shadow">
       <div className="flex items-center justify-between">
         <Heading text1="Summary" text2="Get a quick overview" />
         <Button
