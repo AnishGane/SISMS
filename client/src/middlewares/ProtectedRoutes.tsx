@@ -1,13 +1,13 @@
-import { Navigate, Outlet } from "react-router-dom";
+// import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoutes = () => {
-  const token = localStorage.getItem("token");
+// const ProtectedRoutes = () => {
+//   const token = localStorage.getItem("token");
 
-  if (!token) {
-    return <Navigate to="/auth/admin/login" replace />;
-  }
+//   if (!token) {
+//     return <Navigate to="/auth/admin/login" replace />;
+//   }
 
-  return <Outlet />;
-};
+//   return <Outlet />;
+// };
 
-export default ProtectedRoutes;
+// export default ProtectedRoutes;
