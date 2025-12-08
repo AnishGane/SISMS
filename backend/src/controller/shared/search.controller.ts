@@ -6,107 +6,63 @@ interface AuthRequest extends Request {
   user?: { _id: string; store?: string };
 }
 
-interface Product {
-  _id: string;
-  name: string;
-  store: string;
-}
-
-// Define proper types for scored products
-interface ScoredProduct {
-  product: Product;
-  distance: number;
-  score: number;
-  threshold: number;
-  hasSubstring: boolean; // NEW
-}
-
-export const searchProducts = async (
-  req: AuthRequest,
-  res: Response
-): Promise<Response> => {
+export const searchProducts = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
+
     const storeId = req.user.store || req.user._id;
-    const search =
-      (req.query.search as string | undefined)?.trim().toLowerCase() || "";
+    const search = (req.query.search as string)?.trim().toLowerCase() || "";
+    const category = (req.query.category as string)?.toLowerCase() || "all";
 
     if (!search) {
-      return res.status(400).json({
-        success: false,
-        message: "Search query is required.",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Search query is required." });
     }
 
-    const allProducts = await ProductModel.find({ store: storeId }).lean();
+    let allProducts = await ProductModel.find({ store: storeId }).lean();
 
-    if (allProducts.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No products found in your store.",
-      });
+    // Apply category filter FIRST
+    if (category !== "all") {
+      allProducts = allProducts.filter(
+        (p) => p.category?.toLowerCase() === category
+      );
     }
 
-    // Hybrid scoring: substring match (priority) + fuzzy fallback
-    const scoredProducts: ScoredProduct[] = allProducts.map((p: any) => {
+    // Apply fuzzy + substring scoring on filtered products
+    const scoredProducts = allProducts.map((p: any) => {
       const name = (p.name || "").toLowerCase();
 
-      // 1. Exact substring match (best score = 0)
-      let score = 1.0;
-      if (name.includes(search)) {
-        score = 0.0; // Perfect substring match
-      } else {
-        // 2. Fuzzy Levenshtein fallback
-        const distance = levenshtein(search, name);
-        const maxLen = Math.max(search.length, name.length);
-        score = distance / maxLen;
-      }
-
-      // Dynamic threshold
-      const threshold = search.length <= 2 ? 0.6 : 0.5; // More lenient thresholds
+      let score = name.includes(search)
+        ? 0.0
+        : levenshtein(search, name) / Math.max(search.length, name.length);
+      const threshold = search.length <= 2 ? 0.6 : 0.5;
 
       return {
-        product: p as Product,
-        distance: score * Math.max(search.length, name.length), // For sorting tiebreaker
+        product: p,
         score,
-        threshold,
         hasSubstring: name.includes(search),
+        threshold,
       };
     });
 
-    const results: ScoredProduct[] = scoredProducts
+    const results = scoredProducts
       .filter((r) => r.score <= r.threshold)
-      .sort((a, b) => {
-        // Prioritize substring matches, then lower score
-        if (a.hasSubstring && !b.hasSubstring) return -1;
-        if (!a.hasSubstring && b.hasSubstring) return 1;
-        return a.score - b.score;
-      });
+      .sort((a, b) => (a.hasSubstring ? -1 : 1) || a.score - b.score)
+      .map((r) => r.product);
 
     if (results.length === 0) {
       return res.status(404).json({
         success: false,
         message: "No products match your search.",
-        suggestions: scoredProducts.slice(0, 3).map((r) => r.product.name),
       });
     }
 
-    const source = search.length <= 2 ? "short-hybrid" : "hybrid";
-
-    return res.status(200).json({
-      success: true,
-      source,
-      data: results.map((r) => r.product),
-      total: results.length,
-      message: results.length === 1 ? "" : "Showing best matches:",
-    });
-  } catch (error) {
-    console.error("Search Products Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to search products.",
-    });
+    return res.json({ success: true, data: results });
+  } catch (err) {
+    console.error("Search Error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

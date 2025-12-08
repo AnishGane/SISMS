@@ -1,10 +1,25 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import ProductModel from "../../models/product.model.js";
+import { levenshtein } from "../../utils/levenshteinalgo.js";
 
 // Extend Express Request to include authenticated user
 interface AuthRequest extends Request {
   user?: { _id: string; store?: string };
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  store: string;
+}
+
+// Define type for scored product
+interface ScoredProduct {
+  product: Product;
+  score: number;
+  threshold: number;
+  hasSubstring: boolean;
 }
 
 // CREATE PRODUCT
@@ -120,63 +135,54 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
 // GET PRODUCTS
 export const getProducts = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user)
+    if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
 
     const storeId = req.user.store || req.user._id;
-    const {
-      search = "",
-      category,
-      page = 1,
-      limit = 20,
-      sort = "newest",
-      active = "true",
-    } = req.query;
+    const search = (req.query.search as string)?.trim().toLowerCase() || "";
+    const category = (req.query.category as string)?.toLowerCase() || "all";
 
-    const query: any = { store: storeId };
+    // Fetch all products for this store
+    let allProducts = await ProductModel.find({ store: storeId }).lean();
 
-    // Active / inactive filter
-    if (active === "true") query.isActive = true;
-    else if (active === "false") query.isActive = false;
+    // Filter by category if provided
+    if (category !== "all") {
+      allProducts = allProducts.filter(
+        (p) => p.category?.toLowerCase() === category
+      );
+    }
 
-    // Category filter
-    if (category) query.category = category;
+    // If search is provided, do substring + fuzzy search
+    if (search) {
+      const scoredProducts: ScoredProduct[] = allProducts.map((p: any) => {
+        const name = (p.name || "").toLowerCase();
+        const hasSubstring = name.includes(search);
+        const score = hasSubstring
+          ? 0
+          : levenshtein(search, name) / Math.max(search.length, name.length);
+        const threshold = search.length <= 2 ? 0.6 : 0.5;
 
-    // Text search
-    if (search) query.$text = { $search: String(search) };
+        return { product: p, score, hasSubstring, threshold };
+      });
 
-    const skip = (Number(page) - 1) * Number(limit);
+      allProducts = scoredProducts
+        .filter((r) => r.score <= r.threshold)
+        .sort((a, b) => (a.hasSubstring ? -1 : 1) || a.score - b.score)
+        .map((r) => r.product);
+    }
 
-    const sortOptions: any = {};
-    if (sort === "newest") sortOptions.createdAt = -1;
-    else if (sort === "oldest") sortOptions.createdAt = 1;
-    else if (sort === "stockLow") sortOptions.stock = 1;
-    else if (sort === "stockHigh") sortOptions.stock = -1;
+    if (allProducts.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No products found matching your criteria",
+      });
+    }
 
-    const [products, total] = await Promise.all([
-      ProductModel.find(query)
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(Number(limit)),
-      ProductModel.countDocuments(query),
-    ]);
-
-    return res.status(200).json({
-      success: true,
-      message: "Products fetched successfully",
-      data: products,
-      pagination: {
-        total,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(total / Number(limit)),
-      },
-    });
-  } catch (error) {
-    console.error("Get Products Error:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch products" });
+    return res.json({ success: true, data: allProducts });
+  } catch (err) {
+    console.error("Get Products Error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
