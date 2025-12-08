@@ -17,5 +17,10 @@ export const API_PATHS = {
       GET_LOW_STOCK_ALERTS: '/api/admin/dashboard/low-stock',
       GET_RECENT_ACTIVITY: '/api/admin/dashboard/recent-activity',
     },
+    PRODUCT: {
+      GET_PRODUCTS: '/api/products',
+      CREATE_PRODUCT: '/api/products/add-product',
+      SEARCH_PRODUCTS: '/api/products/search',
+    },
   },
 };

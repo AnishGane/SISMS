@@ -13,15 +13,15 @@ const productRoutes = express.Router();
 
 productRoutes.post("/add-product", auth, allowRoles("admin"), createProduct);
 
-// GET all products with pagination, filters, sorting
+// GET /api/products/search?search=mouse&category=electronics
+productRoutes.get("/search", auth, searchProducts);
+
+// GET all products
 productRoutes.get("/", auth, getProducts);
 
 productRoutes.get("/:id", auth, getEachProduct);
 
 //PUT /api/products/update/6932eea77a9e7f7e1e427952
 productRoutes.put("/update/:id", auth, updateProduct);
-
-// GET /api/products/search?search=notebook
-productRoutes.get("/search", auth, searchProducts);
 
 export default productRoutes;
