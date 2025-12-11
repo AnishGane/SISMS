@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -11,9 +10,15 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-const Sidebar = ({ role = 'admin' }) => {
-  const [collapsed, setCollapsed] = useState(false);
-
+const Sidebar = ({
+  role = 'admin',
+  collapsed,
+  setCollapsed,
+}: {
+  role: 'admin' | 'staff';
+  collapsed: boolean;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const adminMenu = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard' },
     { name: 'Products', icon: <PackageSearch size={20} />, path: '/admin/products' },

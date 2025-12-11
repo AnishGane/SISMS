@@ -6,6 +6,8 @@ import ManageStaff from '../pages/admin/ManageStaff';
 import AdminOrders from '../pages/admin/AdminOrders';
 import AdminSettings from '../pages/admin/AdminSettings';
 import { AdminProvider } from '../context/AdminContext';
+import ProductDetail from '../components/ProductDetail';
+import AddProduct from '../pages/admin/AddProduct';
 
 const AdminRoutes = () => {
   return (
@@ -14,6 +16,8 @@ const AdminRoutes = () => {
         <Route element={<AdminProtectedRoutes />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="products" element={<AdminProducts />} />
+          <Route path="products/:id" element={<ProductDetail />} />
+          <Route path="products/new" element={<AddProduct />} />
           <Route path="staffs" element={<ManageStaff />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="settings" element={<AdminSettings />} />

@@ -2,13 +2,34 @@
 import mongoose from "mongoose";
 import SaleSchema from "./sale.model.js";
 
+const SupplierSchema = new mongoose.Schema(
+  {
+    id: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" },
+    name: { type: String, required: true, index: true },
+    phone: { type: String },
+    email: { type: String },
+    address: { type: String },
+    contactPerson: { type: String },
+    notes: { type: String },
+    store: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+    metadata: {
+      rating: Number,
+      priority: String,
+    },
+  },
+  {
+    timestamps: true,
+    _id: false,
+  }
+);
+
 const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, index: true },
     sku: { type: String, unique: true, sparse: true },
     category: { type: String, required: true, index: true },
     description: { type: String, required: true },
-    image: { type: String, default: "" },
+    image: { type: [String], default: "" },
 
     // pricing
     price: { type: Number, required: true }, // retail price
@@ -22,19 +43,15 @@ const ProductSchema = new mongoose.Schema(
 
     // location & supplier
     location: { type: String, default: "" }, // e.g., Rack A2
-    supplier: {
-      id: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" },
-      name: String,
-      phone: String,
-      email: String,
-    },
+    supplier: SupplierSchema,
 
     // sales history snapshot array (embedded small history)
     salesHistory: { type: [SaleSchema], default: [] },
 
     // analytics metadata
     avgDailySales: { type: Number, default: 0 },
-    lastReorderDate: { type: Date },
+    predictedStockoutDate: { type: Date },
+    recommendedReorderQty: { type: Number, default: 0 },
 
     // store (owner)
     store: {

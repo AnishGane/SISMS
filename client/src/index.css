@@ -76,6 +76,15 @@
     color: var(--color-txt-secondary);
   }
 
+  .no_arrow {
+    -webkit-appearance: none; /* Chrome, Safari, Opera */
+    -moz-appearance: none; /* Firefox */
+    appearance: none; /* Standard */
+    background: transparent; /* Remove background */
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
