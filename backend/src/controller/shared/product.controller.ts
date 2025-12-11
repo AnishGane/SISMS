@@ -2,8 +2,15 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import ProductModel from "../../models/product.model.js";
 import { levenshtein } from "../../utils/levenshteinalgo.js";
+import { normalizeSupplier, uploadToCloudinary } from "../../utils/helper.js";
 
-// Extend Express Request to include authenticated user
+type ProductImageFiles = {
+  image1?: Express.Multer.File[];
+  image2?: Express.Multer.File[];
+  image3?: Express.Multer.File[];
+  image4?: Express.Multer.File[];
+};
+
 interface AuthRequest extends Request {
   user?: { _id: string; store?: string };
 }
@@ -14,7 +21,6 @@ interface Product {
   store: string;
 }
 
-// Define type for scored product
 interface ScoredProduct {
   product: Product;
   score: number;
@@ -25,8 +31,17 @@ interface ScoredProduct {
 // CREATE PRODUCT
 export const createProduct = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user)
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+    console.log("=== CREATE PRODUCT REQUEST ===");
+    console.log("Body:", req.body);
+    console.log("Files:", req.files);
+
+    // Authentication check
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
     const storeId = req.user.store || req.user._id;
 
@@ -35,7 +50,6 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       sku,
       category,
       description,
-      image,
       price,
       cost,
       unit,
@@ -43,35 +57,59 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       reorderLevel,
       leadTimeDays,
       location,
-      supplier,
-      avgDailySales,
       metadata,
+      salesHistory,
     } = req.body;
 
-    // Basic validation
-    if (
-      !name ||
-      !category ||
-      !description ||
-      price === undefined ||
-      cost === undefined
-    ) {
+    // Parse supplier if it's a JSON string
+    let supplier = null;
+    if (req.body.supplier) {
+      try {
+        supplier =
+          typeof req.body.supplier === "string"
+            ? JSON.parse(req.body.supplier)
+            : req.body.supplier;
+      } catch (e) {
+        console.error("Failed to parse supplier data:", e);
+      }
+    }
+
+    if (!name?.trim() || !category?.trim() || !description?.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Name, category, description, price, and cost are required.",
+        message: "Name, category, and description are required.",
       });
     }
 
-    // Trim string fields
+    if (
+      price === undefined ||
+      price === null ||
+      cost === undefined ||
+      cost === null
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Price and cost are required.",
+      });
+    }
+
+    if (isNaN(Number(price)) || isNaN(Number(cost))) {
+      return res.status(400).json({
+        success: false,
+        message: "Price and cost must be valid numbers.",
+      });
+    }
+
     const trimmedName = name.trim();
     const trimmedCategory = category.trim();
     const trimmedDescription = description.trim();
 
-    // Check duplicate by name for same store
+    // Check for duplicate product
     const existing = await ProductModel.findOne({
       name: trimmedName,
       store: storeId,
     });
+
     if (existing) {
       return res.status(409).json({
         success: false,
@@ -79,55 +117,130 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Auto-generate SKU if not provided
-    const generatedSku =
-      sku ||
-      `${trimmedName.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    // Handle image uploads
+    const files = req.files as ProductImageFiles;
+    const filesArray = [
+      files?.image1?.[0],
+      files?.image2?.[0],
+      files?.image3?.[0],
+      files?.image4?.[0],
+    ].filter((file): file is Express.Multer.File => Boolean(file));
 
-    // Supplier object formatting
-    let supplierData = undefined;
-    if (supplier) {
-      supplierData = {
-        id:
-          supplier.id && mongoose.Types.ObjectId.isValid(supplier.id)
-            ? new mongoose.Types.ObjectId(supplier.id)
-            : undefined,
-        name: supplier.name,
-        phone: supplier.phone,
-        email: supplier.email,
-      };
+    if (filesArray.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one product image is required.",
+      });
     }
 
-    // Create product
-    const product = await ProductModel.create({
+    // Upload images to Cloudinary
+    let uploadedImageUrls: string[] = [];
+    try {
+      console.log(`Uploading ${filesArray.length} image(s) to Cloudinary...`);
+      uploadedImageUrls = await Promise.all(
+        filesArray.map((file, index) => {
+          console.log(
+            `Uploading image ${index + 1}/${filesArray.length} (${file.size} bytes)`
+          );
+          return uploadToCloudinary(file);
+        })
+      );
+      console.log(`Successfully uploaded ${uploadedImageUrls.length} image(s)`);
+    } catch (uploadError: any) {
+      console.error("Image upload failed with error:", {
+        message: uploadError?.message,
+        stack: uploadError?.stack,
+        name: uploadError?.name,
+      });
+      return res.status(500).json({
+        success: false,
+        message:
+          uploadError?.message || "Failed to upload images. Please try again.",
+        error:
+          process.env.NODE_ENV === "development"
+            ? uploadError?.message
+            : undefined,
+      });
+    }
+
+    // Generate SKU
+    const generatedSku =
+      sku?.trim() ||
+      `${trimmedName.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    // Check SKU uniqueness
+    const existingSku = await ProductModel.findOne({
+      sku: generatedSku,
+      store: storeId,
+    });
+
+    if (existingSku) {
+      return res.status(409).json({
+        success: false,
+        message: "Product with this SKU already exists.",
+      });
+    }
+
+    // Normalize supplier(handles null properly)
+    const supplierData = normalizeSupplier(supplier, storeId);
+
+    const productData: any = {
       name: trimmedName,
       sku: generatedSku,
       category: trimmedCategory,
       description: trimmedDescription,
-      image: image || "",
-      price,
-      cost,
-      unit: unit || "pcs",
-      stock: stock || 0,
-      reorderLevel: reorderLevel || 10,
-      leadTimeDays: leadTimeDays || 7,
-      location,
-      supplier: supplierData,
-      avgDailySales: avgDailySales || 0,
-      metadata,
+      image: uploadedImageUrls,
+      price: Number(price),
+      cost: Number(cost),
+      unit: unit?.trim() || "pcs",
+      stock: Number(stock) || 0,
+      reorderLevel: Number(reorderLevel) || 10,
+      leadTimeDays: Number(leadTimeDays) || 7,
+      location: location?.trim() || "",
+      // avgDailySales: Number(avgDailySales) || 0,
+      salesHistory: salesHistory || [],
       store: storeId,
-    });
+      isActive: true,
+    };
+
+    // Only add supplier if it has valid data
+    if (supplierData) {
+      productData.supplier = supplierData;
+    }
+
+    // Only add metadata if provided
+    if (metadata) {
+      productData.metadata = metadata;
+    }
+
+    const product = await ProductModel.create(productData);
 
     return res.status(201).json({
       success: true,
       message: "Product created successfully",
       data: product,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Create Product Error:", error);
+
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Duplicate key error. SKU or name already exists.",
+      });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: "Failed to create product",
+      message: "Failed to create product. Please try again.",
     });
   }
 };
@@ -143,17 +256,14 @@ export const getProducts = async (req: AuthRequest, res: Response) => {
     const search = (req.query.search as string)?.trim().toLowerCase() || "";
     const category = (req.query.category as string)?.toLowerCase() || "all";
 
-    // Fetch all products for this store
     let allProducts = await ProductModel.find({ store: storeId }).lean();
 
-    // Filter by category if provided
     if (category !== "all") {
       allProducts = allProducts.filter(
         (p) => p.category?.toLowerCase() === category
       );
     }
 
-    // If search is provided, do substring + fuzzy search
     if (search) {
       const scoredProducts: ScoredProduct[] = allProducts.map((p: any) => {
         const name = (p.name || "").toLowerCase();
@@ -187,23 +297,33 @@ export const getProducts = async (req: AuthRequest, res: Response) => {
 };
 
 // UPDATE PRODUCT
-
 export const updateProduct = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user)
+    if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
 
     const storeId = req.user.store || req.user._id;
     const productId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
 
     const product = await ProductModel.findOne({
       _id: productId,
       store: storeId,
     });
-    if (!product)
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
 
     const {
       name,
@@ -219,26 +339,25 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       leadTimeDays,
       location,
       supplier,
-      avgDailySales,
+      // avgDailySales,
       metadata,
       isActive,
     } = req.body;
 
     // Check name duplicate
-    if (name && name !== product.name) {
+    if (name && name.trim() !== product.name) {
       const duplicate = await ProductModel.findOne({
-        name,
+        name: name.trim(),
         store: storeId,
         _id: { $ne: productId },
       });
-      if (duplicate)
+      if (duplicate) {
         return res.status(409).json({
           success: false,
           message: "Another product with this name exists",
         });
+      }
       product.name = name.trim();
-      if (!sku)
-        product.sku = `${name.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
     }
 
     // Check SKU uniqueness if provided
@@ -248,45 +367,40 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
         store: storeId,
         _id: { $ne: productId },
       });
-      if (skuDuplicate)
+      if (skuDuplicate) {
         return res.status(409).json({
           success: false,
           message: "Another product with this SKU exists",
         });
+      }
       product.sku = sku;
     }
 
-    // Update other fields dynamically
-    const fieldsToUpdate: Record<string, any> = {
-      category,
-      description,
-      image,
-      price,
-      cost,
-      unit,
-      stock,
-      reorderLevel,
-      leadTimeDays,
-      location,
-      avgDailySales,
-      metadata,
-      isActive,
-    };
-    Object.entries(fieldsToUpdate).forEach(([key, value]) => {
-      if (value !== undefined) (product as any)[key] = value;
-    });
+    // Update fields
+    if (category !== undefined) product.category = category;
+    if (description !== undefined) product.description = description;
+    if (image !== undefined) product.image = image;
+    if (price !== undefined) product.price = Number(price);
+    if (cost !== undefined) product.cost = Number(cost);
+    if (unit !== undefined) product.unit = unit;
+    if (stock !== undefined) product.stock = Number(stock);
+    if (reorderLevel !== undefined) product.reorderLevel = Number(reorderLevel);
+    if (leadTimeDays !== undefined) product.leadTimeDays = Number(leadTimeDays);
+    if (location !== undefined) product.location = location;
+    // if (avgDailySales !== undefined)
+    //   product.avgDailySales = Number(avgDailySales);
+    if (metadata !== undefined) product.metadata = metadata;
+    if (isActive !== undefined) product.isActive = isActive;
 
-    // Update supplier safely
-    if (supplier) {
-      product.supplier = {
-        id:
-          supplier.id && mongoose.Types.ObjectId.isValid(supplier.id)
-            ? new mongoose.Types.ObjectId(supplier.id)
-            : undefined,
-        name: supplier.name,
-        phone: supplier.phone,
-        email: supplier.email,
-      };
+    // Update supplier (FIXED)
+    if (supplier !== undefined) {
+      const normalized = normalizeSupplier(supplier, storeId);
+      if (normalized) {
+        product.supplier = normalized as any;
+      } else {
+        // If supplier is being cleared
+        product.supplier = undefined as any;
+      }
     }
 
     await product.save();
@@ -296,15 +410,24 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       message: "Product updated successfully",
       data: product,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Update Product Error:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to update product" });
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Duplicate key error",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update product",
+    });
   }
 };
 
-// Get a one product and its whole details
+// GET SINGLE PRODUCT
 export const getEachProduct = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
@@ -314,22 +437,23 @@ export const getEachProduct = async (req: AuthRequest, res: Response) => {
     const storeId = req.user.store || req.user._id;
     const productId = req.params.id;
 
-    if (!productId || !productId.match(/^[0-9a-fA-F]{24}$/)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid product ID" });
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
     }
 
-    // Find the product belonging to this store
     const product = await ProductModel.findOne({
       _id: productId,
       store: storeId,
     }).lean();
 
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
     }
 
     return res.status(200).json({

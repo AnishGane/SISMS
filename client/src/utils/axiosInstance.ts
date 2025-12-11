@@ -2,10 +2,10 @@ import axios from 'axios';
 import { BASE_URL } from './apiPath';
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  // Prefer explicit API base; fall back to local backend to avoid proxy issues.
+  baseURL: BASE_URL || '',
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });

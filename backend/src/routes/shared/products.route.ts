@@ -8,10 +8,22 @@ import {
 import { allowRoles } from "../../middlewares/role.middleware.js";
 import { auth } from "../../middlewares/auth.middleware.js";
 import { searchProducts } from "../../controller/shared/search.controller.js";
+import upload from "../../middlewares/multer.js";
 
 const productRoutes = express.Router();
 
-productRoutes.post("/add-product", auth, allowRoles("admin"), createProduct);
+productRoutes.post(
+  "/add-product",
+  auth,
+  allowRoles("admin"),
+  upload.fields([
+    { name: "image1", maxCount: 1 },
+    { name: "image2", maxCount: 1 },
+    { name: "image3", maxCount: 1 },
+    { name: "image4", maxCount: 1 },
+  ]),
+  createProduct
+);
 
 // GET /api/products/search?search=mouse&category=electronics
 productRoutes.get("/search", auth, searchProducts);

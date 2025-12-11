@@ -21,6 +21,9 @@ export const API_PATHS = {
       GET_PRODUCTS: '/api/products',
       CREATE_PRODUCT: '/api/products/add-product',
       SEARCH_PRODUCTS: '/api/products/search',
+      GET_EACH_PRODUCT(id: string) {
+        return `/api/products/${id}`;
+      },
     },
   },
 };

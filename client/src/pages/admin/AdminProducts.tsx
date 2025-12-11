@@ -69,6 +69,7 @@ const AdminProducts = () => {
         categories={categories}
         onSearch={(value) => setSearch(value)}
         onCategoryChange={(value) => setCategory(value)}
+        layout={layout}
         onLayoutChange={setLayout}
       />
 
@@ -80,7 +81,7 @@ const AdminProducts = () => {
         <div
           className={
             layout === 'grid'
-              ? 'grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3'
+              ? 'grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:grid-cols-4'
               : 'flex flex-col gap-2 p-4'
           }
         >
