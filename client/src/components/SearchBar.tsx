@@ -1,4 +1,4 @@
-import { Grid, Search, Table2 } from 'lucide-react';
+import { Grid, Plus, Search, Table2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface SearchBarProps {
@@ -32,45 +32,53 @@ const SearchBar: React.FC<SearchBarProps> = ({
         />
         <Search className="text-base-content pointer-events-none absolute top-1/2 right-3 -translate-y-1/2" />
       </div>
-      <div>
-        <Link to={'/admin/products/new'}>
-          <button className="bg-black p-2 text-white">Add Product</button>
-        </Link>
-      </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          title="Grid Layout"
-          onClick={() => onLayoutChange('grid')}
-          className={`cursor-pointer rounded-md p-1 ring ring-neutral-400 transition-colors duration-200 ${
-            layout === 'grid' ? 'bg-[#FF7477] text-white' : 'hover:bg-base-300'
-          }`}
-        >
-          <Grid />
-        </button>
+      <div className="flex items-center gap-8">
+        <div>
+          <Link to={'/admin/products/new'}>
+            <div title='Add New Product' className="cursor-pointer rounded-full text-white bg-[#ff7477] p-1">
+              <Plus />
+            </div>
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            title="Grid Layout"
+            onClick={() => onLayoutChange('grid')}
+            className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
+              layout === 'grid'
+                ? 'bg-[#FF7477] text-white'
+                : 'hover:bg-black/5 ring ring-neutral-400'
+            }`}
+          >
+            <Grid />
+          </button>
 
-        <button
-          title="Table Layout"
-          onClick={() => onLayoutChange('table')}
-          className={`cursor-pointer rounded-md p-1 ring ring-neutral-400 transition-colors duration-200 ${
-            layout === 'table' ? 'bg-[#FF7477] text-white' : 'hover:bg-base-300'
-          }`}
-        >
-          <Table2 />
-        </button>
+          <button
+            title="Table Layout"
+            onClick={() => onLayoutChange('table')}
+            className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
+              layout === 'table'
+                ? 'bg-[#FF7477] text-white'
+                : 'hover:bg-black/5 ring ring-neutral-400'
+            }`}
+          >
+            <Table2 />
+          </button>
 
-        <select
-          value={category}
-          onChange={(e) => onCategoryChange(e.target.value)}
-          className="no_arrow mr-px ml-4 cursor-pointer rounded-sm px-3 py-2 text-sm shadow-sm ring ring-neutral-200 outline-none"
-        >
-          <option value="all">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          <select
+            value={category}
+            onChange={(e) => onCategoryChange(e.target.value)}
+            className="select select-bordered outline-none"
+          >
+            <option value="all">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );

@@ -208,9 +208,22 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       productData.supplier = supplierData;
     }
 
-    // Only add metadata if provided
-    if (metadata) {
-      productData.metadata = metadata;
+    // Parse metadata if sent as JSON string
+    let parsedMetadata = null;
+
+    if (req.body.metadata) {
+      try {
+        parsedMetadata =
+          typeof req.body.metadata === "string"
+            ? JSON.parse(req.body.metadata)
+            : req.body.metadata;
+      } catch (e) {
+        console.error("Failed to parse metadata:", e);
+      }
+    }
+
+    if (parsedMetadata) {
+      productData.metadata = parsedMetadata;
     }
 
     const product = await ProductModel.create(productData);

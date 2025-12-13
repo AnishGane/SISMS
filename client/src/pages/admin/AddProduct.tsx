@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import axios from 'axios';
 import AdminLayout from '../../layouts/AdminLayout';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPath';
+import { Trash } from 'lucide-react';
 
 interface SupplierData {
   name: string;
@@ -11,6 +11,12 @@ interface SupplierData {
   address: string;
   contactPerson: string;
   notes: string;
+}
+
+type ImageKey = 'image1' | 'image2' | 'image3' | 'image4';
+interface ProductMetadata {
+  key: string; // e.g., "Color / Colors"
+  value: string; // e.g., "Black / Black,Red"
 }
 
 interface ProductFormData {
@@ -24,7 +30,6 @@ interface ProductFormData {
   reorderLevel: string;
   leadTimeDays: string;
   location: string;
-  avgDailySales: string;
   supplier: SupplierData;
 }
 
@@ -40,7 +45,6 @@ const AddProduct = () => {
     reorderLevel: '10',
     leadTimeDays: '7',
     location: '',
-    avgDailySales: '0',
     supplier: {
       name: '',
       phone: '',
@@ -51,17 +55,31 @@ const AddProduct = () => {
     },
   });
 
-  const [images, setImages] = useState<{
-    image1: File | null;
-    image2: File | null;
-    image3: File | null;
-    image4: File | null;
-  }>({
+  const [images, setImages] = useState<Record<ImageKey, File | null>>({
     image1: null,
     image2: null,
     image3: null,
     image4: null,
   });
+
+  // Metadata Dynamic Fields
+  const [metadata, setMetadata] = useState<ProductMetadata[]>([{ key: '', value: '' }]);
+
+  const handleMetadataChange = (index: number, field: 'key' | 'value', value: string) => {
+    setMetadata((prev) => {
+      const updated = [...prev];
+      updated[index][field] = value;
+      return updated;
+    });
+  };
+
+  const addMetadataField = () => {
+    setMetadata((prev) => [...prev, { key: '', value: '' }]);
+  };
+
+  const removeMetadataField = (index: number) => {
+    setMetadata((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -150,7 +168,6 @@ const AddProduct = () => {
       data.append('reorderLevel', formData.reorderLevel);
       data.append('leadTimeDays', formData.leadTimeDays);
       data.append('location', formData.location.trim());
-      data.append('avgDailySales', formData.avgDailySales);
 
       // Add supplier as JSON string (only if supplier name is provided)
       if (formData.supplier.name.trim()) {
@@ -173,6 +190,19 @@ const AddProduct = () => {
       if (images.image3) data.append('image3', images.image3);
       if (images.image4) data.append('image4', images.image4);
 
+      // Converting the array of metadata objects into a single object
+      const metadataObject: Record<string, any> = {};
+
+      metadata.forEach((item) => {
+        if (item.key.trim() !== '') {
+          // if value contains commas, store as array
+          metadataObject[item.key] = item.value.includes(',')
+            ? item.value.split(',').map((v) => v.trim())
+            : item.value;
+        }
+      });
+      data.append('metadata', JSON.stringify(metadataObject));
+
       console.log('Submitting product data...');
 
       // Make API request
@@ -180,7 +210,6 @@ const AddProduct = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        withCredentials: true, // If using cookies for auth
       });
 
       console.log('Response:', response.data);
@@ -199,7 +228,6 @@ const AddProduct = () => {
         reorderLevel: '10',
         leadTimeDays: '7',
         location: '',
-        avgDailySales: '0',
         supplier: {
           name: '',
           phone: '',
@@ -215,6 +243,7 @@ const AddProduct = () => {
         image3: null,
         image4: null,
       });
+      setMetadata([]);
     } catch (err: any) {
       console.error('Error creating product:', err);
       console.error('Error response:', err.response?.data);
@@ -230,72 +259,73 @@ const AddProduct = () => {
 
   return (
     <AdminLayout>
-      <h1 className="mb-6 text-2xl font-bold">Add New Product</h1>
+      <h1 className="mb-6 text-2xl font-medium">Add New Product</h1>
 
       {error && (
-        <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
-          {error}
+        <div className="alert alert-error mb-4">
+          <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 rounded border border-green-400 bg-green-100 px-4 py-3 text-green-700">
-          {success}
+        <div className="alert alert-success mb-4">
+          <span>{success}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="add_form space-y-6">
         {/* Basic Information */}
-        <div className="rounded-lg bg-white p-6 shadow">
+        <div className="card bg-base-200 p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold">Basic Information</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                Product Name <span className="text-red-500">*</span>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">
+                Product Name <span className="text-error">*</span>
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
                 required
+                placeholder="Wireless Mac Keyboard"
               />
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                Category <span className="text-red-500">*</span>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">
+                Category<span className="text-error"> *</span>
               </label>
               <input
                 type="text"
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
                 required
+                placeholder="Electronics"
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-sm font-medium">
-                Description <span className="text-red-500">*</span>
+            <div className="space-y-1 md:col-span-2">
+              <label className="block text-sm font-medium">
+                Description<span className="text-error"> *</span>
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                rows={3}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                required
+                className="textarea textarea-bordered w-full rounded-sm outline-none"
+                placeholder="Description here"
               />
             </div>
           </div>
         </div>
 
         {/* Pricing */}
-        <div className="rounded-lg bg-white p-6 shadow">
+        <div className="bg-base-200 rounded-lg p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold">Pricing</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -310,8 +340,9 @@ const AddProduct = () => {
                 onChange={handleInputChange}
                 step="0.01"
                 min="0"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
                 required
+                placeholder="99.99"
               />
             </div>
 
@@ -326,8 +357,9 @@ const AddProduct = () => {
                 onChange={handleInputChange}
                 step="0.01"
                 min="0"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
                 required
+                placeholder="99.99"
               />
             </div>
 
@@ -337,7 +369,7 @@ const AddProduct = () => {
                 name="unit"
                 value={formData.unit}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="select select-bordered w-full rounded-sm outline-none"
               >
                 <option value="pcs">Pieces</option>
                 <option value="kg">Kilograms</option>
@@ -349,77 +381,128 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* Inventory */}
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-xl font-semibold">Inventory</h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Inventory */}
+          <div className="bg-base-200 rounded-lg p-6 shadow">
+            <h2 className="mb-4 text-xl font-semibold">Inventory</h2>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Stock</label>
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleInputChange}
-                min="0"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Stock</label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                  min="0"
+                  className="input input-bordered w-full rounded-sm outline-none"
+                />
+              </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium">Reorder Level</label>
-              <input
-                type="number"
-                name="reorderLevel"
-                value={formData.reorderLevel}
-                onChange={handleInputChange}
-                min="0"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Reorder Level</label>
+                <input
+                  type="number"
+                  name="reorderLevel"
+                  value={formData.reorderLevel}
+                  onChange={handleInputChange}
+                  min="0"
+                  className="input input-bordered w-full rounded-sm outline-none"
+                />
+              </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium">Lead Time (Days)</label>
-              <input
-                type="number"
-                name="leadTimeDays"
-                value={formData.leadTimeDays}
-                onChange={handleInputChange}
-                min="0"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Lead Time (Days)</label>
+                <input
+                  type="number"
+                  name="leadTimeDays"
+                  value={formData.leadTimeDays}
+                  onChange={handleInputChange}
+                  min="0"
+                  className="input input-bordered w-full rounded-sm outline-none"
+                />
+              </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium">Location</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="e.g., Rack A2"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              />
+              <div>
+                <label className="mb-1 block text-sm font-medium">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Rack A2"
+                  className="input input-bordered w-full rounded-sm outline-none"
+                />
+              </div>
             </div>
+          </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium">Avg Daily Sales</label>
-              <input
-                type="number"
-                name="avgDailySales"
-                value={formData.avgDailySales}
-                onChange={handleInputChange}
-                min="0"
-                step="0.1"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          {/* Product Metadata */}
+          <div className="bg-base-200 rounded-lg p-6 shadow">
+            <h2 className="mb-4 text-xl font-semibold">
+              Product Metadata <span className="text-base font-normal">(Optional)</span>
+            </h2>
+
+            {metadata.map((meta, index) => (
+              <div
+                key={index}
+                className="mb-4 flex flex-col gap-4 rounded-lg md:flex-row md:items-end"
+              >
+                {/* Name */}
+                <div className="flex-1">
+                  <label className="mb-1 block text-sm font-medium">Name</label>
+                  <input
+                    type="text"
+                    value={meta.key}
+                    onChange={(e) => handleMetadataChange(index, 'key', e.target.value)}
+                    placeholder="e.g., Color"
+                    className="input input-bordered w-full outline-none"
+                  />
+                </div>
+
+                {/* Value */}
+                <div className="flex-1">
+                  <label className="mb-1 block text-sm font-medium">Value</label>
+                  <input
+                    type="text"
+                    value={meta.value}
+                    onChange={(e) => handleMetadataChange(index, 'value', e.target.value)}
+                    placeholder="e.g., Black"
+                    className="input input-bordered w-full outline-none"
+                  />
+                </div>
+
+                {/* Remove Button */}
+                {metadata.length > 1 && (
+                  <div className="flex justify-end md:w-24">
+                    <button
+                      type="button"
+                      onClick={() => removeMetadataField(index)}
+                      className="btn btn-error btn-sm mb-1 w-full md:w-auto"
+                    >
+                      <Trash size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Add Another */}
+            <button
+              type="button"
+              onClick={addMetadataField}
+              className="btn btn-neutral btn-sm mt-2 py-5"
+            >
+              + Add Another
+            </button>
           </div>
         </div>
 
         {/* Supplier Information */}
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-xl font-semibold">Supplier Information (Optional)</h2>
+        <div className="bg-base-200 rounded-lg p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">
+            Supplier Information <span className="text-base font-normal">(Optional)</span>
+          </h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
@@ -429,7 +512,8 @@ const AddProduct = () => {
                 name="name"
                 value={formData.supplier.name}
                 onChange={handleSupplierChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
+                placeholder="Supplier Name"
               />
             </div>
 
@@ -440,7 +524,8 @@ const AddProduct = () => {
                 name="phone"
                 value={formData.supplier.phone}
                 onChange={handleSupplierChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
+                placeholder="Phone Number"
               />
             </div>
 
@@ -451,7 +536,8 @@ const AddProduct = () => {
                 name="email"
                 value={formData.supplier.email}
                 onChange={handleSupplierChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
+                placeholder="Email Address"
               />
             </div>
 
@@ -462,7 +548,8 @@ const AddProduct = () => {
                 name="contactPerson"
                 value={formData.supplier.contactPerson}
                 onChange={handleSupplierChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
+                placeholder="Contact Person"
               />
             </div>
 
@@ -473,7 +560,8 @@ const AddProduct = () => {
                 name="address"
                 value={formData.supplier.address}
                 onChange={handleSupplierChange}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="input input-bordered w-full rounded-sm outline-none"
+                placeholder="Address"
               />
             </div>
 
@@ -483,60 +571,59 @@ const AddProduct = () => {
                 name="notes"
                 value={formData.supplier.notes}
                 onChange={handleSupplierChange}
-                rows={2}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                rows={4}
+                className="input input-bordered w-full resize-none rounded-sm pt-1 outline-none"
+                placeholder="Notes"
               />
             </div>
           </div>
         </div>
 
         {/* Product Images */}
-        <div className="rounded-lg bg-white p-6 shadow">
+        <div className="card bg-base-100 p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold">
-            Product Images <span className="text-red-500">*</span>
+            Product Images <span className="text-error">*</span>
           </h2>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {['image1', 'image2', 'image3', 'image4'].map((imageKey, index) => (
-              <div key={imageKey}>
-                <label className="mb-1 block text-sm font-medium">
-                  Image {index + 1} {index === 0 && <span className="text-red-500">*</span>}
+            {(['image1', 'image2', 'image3', 'image4'] as ImageKey[]).map((imageKey, idx) => (
+              <div key={imageKey} className="space-y-1">
+                <label className="label">
+                  <span className="label-text">
+                    Image {idx + 1} {idx === 0 && <span className="text-error">*</span>}
+                  </span>
                 </label>
+
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleImageChange(e, imageKey)}
-                  className="w-full text-sm"
-                  required={index === 0}
+                  className="file-input file-input-bordered file-input-primary w-full"
+                  required={idx === 0}
                 />
-                {images[imageKey as keyof typeof images] && (
-                  <p className="mt-1 text-xs text-green-600">
-                    ✓ {images[imageKey as keyof typeof images]?.name}
-                  </p>
+
+                {images[imageKey] && (
+                  <p className="text-success mt-1 text-xs">✓ {images[imageKey]?.name}</p>
                 )}
               </div>
             ))}
           </div>
-          <p className="mt-2 text-sm text-gray-600">
-            Max size: 5MB per image. At least one image required.
-          </p>
+
+          <p className="text-base-content/70 mt-2 text-xs">Max size: 5MB per image.</p>
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end gap-4">
           <button
             type="button"
             onClick={() => window.history.back()}
-            className="rounded-lg border px-6 py-2 hover:bg-gray-100"
+            className="btn btn-outline rounded-md"
             disabled={loading}
           >
             Cancel
           </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
-          >
+
+          <button type="submit" disabled={loading} className="btn btn-primary rounded-md">
             {loading ? 'Creating...' : 'Create Product'}
           </button>
         </div>

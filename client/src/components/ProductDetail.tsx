@@ -5,14 +5,6 @@ import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import AdminLayout from '../layouts/AdminLayout';
 
-// ----------------------
-// TYPES
-// ----------------------
-interface SupplierMeta {
-  rating?: number;
-  priority?: string;
-}
-
 interface Supplier {
   id?: string;
   name?: string;
@@ -21,17 +13,11 @@ interface Supplier {
   address?: string;
   contactPerson?: string;
   notes?: string;
-  metadata?: SupplierMeta;
 }
 
 interface SalesHistory {
   quantity: number;
   priceAtSale: number;
-}
-
-interface ProductMeta {
-  colorOptions?: string[];
-  warrantyMonths?: number;
 }
 
 interface Product {
@@ -40,8 +26,7 @@ interface Product {
   sku: string;
   category: string;
   description: string;
-  image?: string;
-  images?: string[]; // optional multiple images
+  image?: string[];
   price: number;
   cost: number;
   unit: string;
@@ -53,7 +38,7 @@ interface Product {
   salesHistory?: SalesHistory[];
   avgDailySales?: number;
   lastReorderDate?: string;
-  metadata?: ProductMeta;
+  metadata?: any;
 }
 
 const ProductDetail = () => {
@@ -72,7 +57,7 @@ const ProductDetail = () => {
         const p = res.data.data as Product;
 
         setProduct(p);
-        setSelectedImage(p.image || p.images?.[0] || '');
+        setSelectedImage(Array.isArray(p.image) && p.image.length > 0 ? p.image[0] : '');
       } catch (err) {
         console.error('Error fetching product:', err);
       } finally {
@@ -86,27 +71,30 @@ const ProductDetail = () => {
   if (loading) return <p className="p-6">Loading...</p>;
   if (!product) return <p className="p-6">Product not found.</p>;
 
-  const thumbnails =
-    product.images && product.images.length > 0 ? product.images : [product.image || ''];
+  const thumbnails = product.image && product.image.length > 0 ? product.image : [];
 
   return (
     <AdminLayout>
-      <div className="p-4">
+      <div>
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 flex items-center gap-1 text-sm hover:underline"
+          className="mb-4 flex cursor-pointer items-center gap-0.5 text-sm"
         >
-          <ArrowLeft size={18} />
-          Back
+          <ArrowLeft size={16} />
+          <div className="group leading-4">
+            <p>Back</p>
+            <hr className="w-0 transition-all duration-200 group-hover:w-full" />
+          </div>
         </button>
+        <h1 className="mb-6 text-2xl font-medium">Product Details</h1>
 
         {/* ---------- TOP CONTENT: IMAGE LEFT + DETAILS RIGHT ---------- */}
         <div className="flex flex-col gap-10 lg:flex-row">
           {/* LEFT: IMAGES */}
-          <div className="lg:w-1/2">
+          <div className="lg:w-[40%]">
             {/* BIG MAIN IMAGE */}
-            <div className="mb-3 h-80 w-full overflow-hidden rounded-lg bg-gray-200">
+            <div className="mb-3 h-96 w-full overflow-hidden rounded-lg bg-gray-200">
               {selectedImage ? (
                 <img src={selectedImage} alt="Product" className="h-full w-full object-cover" />
               ) : (
@@ -123,7 +111,7 @@ const ProductDetail = () => {
                   key={index}
                   src={img}
                   onClick={() => setSelectedImage(img)}
-                  className={`h-20 w-20 cursor-pointer rounded-md border object-cover ${
+                  className={`h-20 w-20 cursor-pointer rounded-md border-2 object-cover ${
                     selectedImage === img ? 'border-blue-500' : 'border-gray-300'
                   }`}
                 />
@@ -132,7 +120,7 @@ const ProductDetail = () => {
           </div>
 
           {/* RIGHT: PRODUCT INFORMATION */}
-          <div className="space-y-3 lg:w-1/2">
+          <div className="space-y-2 lg:w-1/2">
             <h1 className="text-2xl font-semibold">{product.name}</h1>
             <p className="text-gray-600">{product.description}</p>
 
@@ -167,23 +155,21 @@ const ProductDetail = () => {
                 <strong>Last Reorder:</strong>{' '}
                 {product.lastReorderDate ? new Date(product.lastReorderDate).toDateString() : 'N/A'}
               </p>
-            </div>
 
-            {/* Metadata */}
-            {product.metadata && (
-              <div className="mt-2 text-sm">
-                {product.metadata.colorOptions && (
-                  <p>
-                    <strong>Colors:</strong> {product.metadata.colorOptions.join(', ')}
-                  </p>
-                )}
-                {product.metadata.warrantyMonths && (
-                  <p>
-                    <strong>Warranty:</strong> {product.metadata.warrantyMonths} months
-                  </p>
-                )}
-              </div>
-            )}
+              {product.metadata && Object.keys(product.metadata).length > 0 && (
+                <div>
+                  <h3 className="mb-2 text-lg font-semibold">Metadata</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                    {Object.entries(product.metadata).map(([key, value]) => (
+                      <p key={key}>
+                        <strong>{key}:</strong>{' '}
+                        {Array.isArray(value) ? value.join(', ') : value?.toString() || 'N/A'}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -210,17 +196,6 @@ const ProductDetail = () => {
             <p>
               <strong>Notes:</strong> {product.supplier?.notes || 'N/A'}
             </p>
-
-            {product.supplier?.metadata && (
-              <>
-                <p>
-                  <strong>Rating:</strong> {product.supplier.metadata.rating}
-                </p>
-                <p>
-                  <strong>Priority:</strong> {product.supplier.metadata.priority}
-                </p>
-              </>
-            )}
           </div>
         </div>
       </div>

@@ -55,7 +55,6 @@
     border-left: 100px solid transparent;
   }
 
-  /* Improved button */
   .btn-linear {
     @apply bg-linear-to-r from-indigo-500 via-indigo-600 to-purple-500;
   }
@@ -84,6 +83,7 @@
     border: 1px solid #ccc;
     padding: 8px 12px;
   }
+
 
   @keyframes fadeIn {
     from {
