@@ -17,6 +17,19 @@ export const API_PATHS = {
       GET_LOW_STOCK_ALERTS: '/api/admin/dashboard/low-stock',
       GET_RECENT_ACTIVITY: '/api/admin/dashboard/recent-activity',
     },
+    STAFF: {
+      GET_STAFFS: '/api/admin/staff',
+      CREATE_STAFF: '/api/admin/staff/add-staff',
+      TOGGLE_STATUS(id: string) {
+        return `/api/admin/staff/${id}/toggle-status`;
+      },
+      UPDATE_STAFF(id: string) {
+        return `/api/admin/staff/${id}`;
+      },
+      DELETE_STAFF(id: string) {
+        return `/api/admin/staff/${id}`;
+      },
+    },
     PRODUCT: {
       GET_PRODUCTS: '/api/products',
       CREATE_PRODUCT: '/api/products/add-product',

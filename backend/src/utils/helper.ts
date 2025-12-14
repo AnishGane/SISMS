@@ -39,7 +39,9 @@ export const normalizeSupplier = (supplier: any, storeId: string) => {
 };
 
 // Helper: Cloudinary Upload
-export const uploadToCloudinary = (file: Express.Multer.File): Promise<string> => {
+export const uploadToCloudinary = (
+  file: Express.Multer.File
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     // Validate file buffer exists
     if (!file.buffer) {
@@ -61,7 +63,7 @@ export const uploadToCloudinary = (file: Express.Multer.File): Promise<string> =
 
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "products",
+        folder: "SISMS",
         resource_type: "image",
         transformation: [
           { width: 800, height: 800, crop: "limit" },
