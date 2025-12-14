@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Sidebar from '../components/ui/Sidebar';
+import Sidebar from '../components/Sidebar';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);

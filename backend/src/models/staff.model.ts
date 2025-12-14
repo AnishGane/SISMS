@@ -28,7 +28,6 @@ const StaffSchema = new mongoose.Schema(
     resetOTP: { type: String },
     resetOTPExpiry: { type: Date },
 
-    metadata: { type: mongoose.Schema.Types.Mixed },
   },
   {
     timestamps: true,

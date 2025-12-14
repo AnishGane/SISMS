@@ -1,5 +1,5 @@
 import React from "react";
-import Input from "../ui/Input";
+import Input from "../ui/AuthInput";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../ui/Button";
 

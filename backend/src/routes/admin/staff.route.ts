@@ -5,23 +5,26 @@ import { allowRoles } from "../../middlewares/role.middleware.js";
 import {
   createStaff,
   getAllStaff,
-  deactivateStaff,
+  updateStaff,
+  deleteStaff,
+  toggleStatus,
 } from "../../controller/admin/staff.controller.js";
 
 const staffRoutes = express.Router();
 
 // Create staff
-staffRoutes.post("/create", auth, allowRoles("admin"), createStaff);
+staffRoutes.post("/add-staff", auth, allowRoles("admin"), createStaff);
 
 // Get all staff under the admin
 staffRoutes.get("/", auth, allowRoles("admin"), getAllStaff);
 
 // Deactivate staff
-staffRoutes.patch(
-  "/:id/deactivate",
-  auth,
-  allowRoles("admin"),
-  deactivateStaff
-);
+staffRoutes.patch("/:id/toggle-status", auth, allowRoles("admin"), toggleStatus);
+
+// Update staff
+staffRoutes.put("/:id", auth, allowRoles("admin"), updateStaff);
+
+// Delete staff
+staffRoutes.delete("/:id", auth, allowRoles("admin"), deleteStaff);
 
 export default staffRoutes;
