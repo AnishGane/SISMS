@@ -37,6 +37,10 @@ export const API_PATHS = {
       GET_EACH_PRODUCT(id: string) {
         return `/api/products/${id}`;
       },
+      UPDATE_PRODUCT(id: string) {
+        return `/api/roducts/${id}`;
+      },
+      GET_CATEGORIES: '/api/products/categories',
     },
   },
 };

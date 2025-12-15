@@ -70,7 +70,7 @@ const Sidebar = ({
 
         {/* Logout */}
         <button
-          className={`bg-error text-error-content mx-2 my-6 flex w-[calc(100%-1rem)] cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition hover:brightness-110`}
+          className={`bg-error mx-2 my-6 flex w-[calc(100%-1rem)] cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-white transition hover:brightness-110`}
           onClick={() => {
             localStorage.clear();
             window.location.href = role === 'admin' ? '/auth/admin/login' : '/auth/staff/login';

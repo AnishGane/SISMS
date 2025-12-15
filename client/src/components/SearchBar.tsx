@@ -9,6 +9,8 @@ interface SearchBarProps {
   onSearch: (q: string) => void;
   onCategoryChange: (cat: string) => void;
   onLayoutChange: (layout: 'grid' | 'table') => void;
+  onSortChange: (sort: 'recent' | 'oldest' | 'price') => void;
+  sort: 'recent' | 'oldest' | 'price';
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -19,12 +21,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   onCategoryChange,
   onLayoutChange,
+  onSortChange,
+  sort,
 }) => {
   return (
-    <div className="bg-base-100 ring-neutral flex flex-col gap-3 rounded-md p-1 shadow-sm ring md:flex-row md:items-center md:justify-between">
+    <div className="bg-base-100 ring-base-300 flex flex-col gap-3 rounded-md p-1 shadow-md ring md:flex-row md:items-center md:justify-between">
       <div className="relative w-full max-w-4xl">
         <input
           type="text"
+          title="Search products by name"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search products by name"
@@ -36,7 +41,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <div className="flex items-center gap-8">
         <div>
           <Link to={'/admin/products/new'}>
-            <div title='Add New Product' className="cursor-pointer rounded-full text-white bg-[#ff7477] p-1">
+            <div
+              title="Add New Product"
+              className="cursor-pointer rounded-full bg-[#ff7477] p-1 text-white"
+            >
               <Plus />
             </div>
           </Link>
@@ -48,7 +56,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
               layout === 'grid'
                 ? 'bg-[#FF7477] text-white'
-                : 'hover:bg-black/5 ring ring-neutral-400'
+                : 'ring ring-neutral-400 hover:bg-black/5'
             }`}
           >
             <Grid />
@@ -60,7 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
               layout === 'table'
                 ? 'bg-[#FF7477] text-white'
-                : 'hover:bg-black/5 ring ring-neutral-400'
+                : 'ring ring-neutral-400 hover:bg-black/5'
             }`}
           >
             <Table2 />
@@ -69,14 +77,25 @@ const SearchBar: React.FC<SearchBarProps> = ({
           <select
             value={category}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="select select-bordered outline-none"
+            className="select select-bordered capitalize outline-none"
           >
-            <option value="all">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
+            <div className="max-h-40 overflow-y-auto">
+              <option value="all">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </div>
+          </select>
+          <select
+            value={sort}
+            onChange={(e) => onSortChange(e.target.value as any)}
+            className="select select-bordered capitalize outline-none"
+          >
+            <option value="recent">Sort by Recent</option>
+            <option value="oldest">Sort by Oldest</option>
+            <option value="price">Sort by Price</option>
           </select>
         </div>
       </div>

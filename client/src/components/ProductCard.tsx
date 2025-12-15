@@ -25,7 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout }) => {
 
   return (
     <div
-      className={`card bg-base-200 shadow transition-all hover:shadow-md ${
+      className={`card bg-base-200 rounded-md shadow-md transition-all hover:shadow-lg ${
         layout === 'grid' ? 'w-full text-center' : 'flex flex-row items-center rounded-md px-1.5'
       }`}
     >
@@ -68,16 +68,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout }) => {
               <span>SKU: {product.sku}</span>
             </div>
           )}
-          {/* ------ GRID ONLY: STATUS + BUTTON ------ */}
+          {/* ------ GRID ONLY: STOCK + BUTTON ------ */}
           {layout === 'grid' && (
             <div className="mt-3 flex items-center justify-between">
-              <span
-                className={`badge badge-sm rounded-full p-3 ${
-                  product.isActive ? 'badge-success' : 'badge-error'
-                }`}
-              >
-                {product.isActive ? 'Active' : 'Inactive'}
-              </span>
+              <p className="text-neutral-500">
+                Available in Stock: <span className="font-semibold">{product.stock}</span>
+              </p>
 
               <Link to={`/admin/products/${product._id}`}>
                 <div className="text-base-content group cursor-pointer leading-4">
