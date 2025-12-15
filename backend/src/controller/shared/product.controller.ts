@@ -482,3 +482,36 @@ export const getEachProduct = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const getCategories = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const storeId = req.user.store || req.user._id;
+
+    const categories = await ProductModel.aggregate([
+      {
+        $match: {
+          store: storeId,
+          category: { $exists: true, $ne: null || "" },
+        },
+      },
+      { $group: { _id: "$category" } },
+      { $sort: { _id: 1 } },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Categories fetched successfully",
+      data: categories,
+    });
+  } catch (error) {
+    console.error("Get Categories Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch categories",
+    });
+  }
+};

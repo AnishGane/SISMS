@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createProduct,
+  getCategories,
   getEachProduct,
   getProducts,
   updateProduct,
@@ -30,10 +31,11 @@ productRoutes.get("/search", auth, searchProducts);
 
 // GET all products
 productRoutes.get("/", auth, getProducts);
+productRoutes.get("/categories", auth, getCategories);
 
 productRoutes.get("/:id", auth, getEachProduct);
 
-//PUT /api/products/update/6932eea77a9e7f7e1e427952
-productRoutes.put("/update/:id", auth, updateProduct);
+//PUT /api/products/6932eea77a9e7f7e1e427952
+productRoutes.put("/:id", auth, updateProduct);
 
 export default productRoutes;

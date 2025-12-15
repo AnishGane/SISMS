@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import SearchBar from '../../components/SearchBar';
@@ -6,14 +6,15 @@ import AdminLayout from '../../layouts/AdminLayout';
 import ProductCard from '../../components/ProductCard';
 import { useDebounce } from '../../hooks/useDebounce';
 import { API_PATHS } from '../../utils/apiPath';
+import ProductCardSkeleton from '../../components/ui/skeletons/ProductCardSkeleton';
 
-const categories = ['Clothing', 'Electronics', 'Cosmetics', 'Stationery'];
+type SortType = 'recent' | 'oldest' | 'price';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [layout, setLayout] = useState<'grid' | 'table'>('grid');
   const [loading, setLoading] = useState(false);
-
+  const [categories, setCategories] = useState<string[]>([]);
   const [params, setParams] = useSearchParams();
   const initialSearch = params.get('search') || '';
   const initialCategory = params.get('category') || 'all';
@@ -21,6 +22,35 @@ const AdminProducts = () => {
   // Local state to control the inputs immediately
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCategory);
+
+  // For Sorting products
+  const [sort, setSort] = useState<SortType>('recent');
+
+  const handleSortProduct = (value: SortType) => {
+    setSort(value);
+  };
+
+  const sortedProducts = useMemo(() => {
+    const list = [...products];
+
+    switch (sort) {
+      case 'recent':
+        return list.sort(
+          (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+      case 'oldest':
+        return list.sort(
+          (a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+
+      case 'price':
+        return list.sort((a: any, b: any) => a.price - b.price);
+
+      default:
+        return list;
+    }
+  }, [products, sort]);
 
   /** Fetch products from API */
   const fetchProducts = async (query: string, cat: string) => {
@@ -48,6 +78,24 @@ const AdminProducts = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axiosInstance.get(API_PATHS.ADMIN.PRODUCT.GET_CATEGORIES);
+
+        const cats = res.data.data
+          .map((c: any) => c._id)
+          .filter((c: string) => typeof c === 'string' && c.trim() !== '');
+
+        setCategories(cats);
+      } catch (err) {
+        console.error('Fetch categories error:', err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   /** Debounced fetch */
   const debouncedFetch = useDebounce((q, c) => fetchProducts(q, c), 400);
 
@@ -61,6 +109,10 @@ const AdminProducts = () => {
     debouncedFetch(search, category);
   }, [search, category]);
 
+  const getSkeletonCount = (layout: 'grid' | 'table') => {
+    return layout === 'grid' ? 12 : 6;
+  };
+
   return (
     <AdminLayout>
       <SearchBar
@@ -71,21 +123,31 @@ const AdminProducts = () => {
         onCategoryChange={(value) => setCategory(value)}
         layout={layout}
         onLayoutChange={setLayout}
+        onSortChange={handleSortProduct}
+        sort={sort}
       />
 
       {loading ? (
-        <div className="p-4 text-center text-gray-500">Loading...</div>
-      ) : products.length === 0 ? (
-        <div className="p-4 text-center text-gray-500">No products found</div>
-      ) : (
         <div
           className={
             layout === 'grid'
-              ? 'grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:grid-cols-4'
+              ? 'grid grid-cols-1 gap-4 py-4 md:grid-cols-2 lg:grid-cols-4'
               : 'flex flex-col gap-2 p-4'
           }
         >
-          {products.map((p: any) => (
+          {Array.from({ length: getSkeletonCount(layout) }).map((_, i) => (
+            <ProductCardSkeleton key={i} layout={layout} />
+          ))}
+        </div>
+      ) : products.length === 0 ? null : (
+        <div
+          className={
+            layout === 'grid'
+              ? 'grid grid-cols-1 gap-4 py-4 md:grid-cols-2 lg:grid-cols-4'
+              : 'flex flex-col gap-2 p-4'
+          }
+        >
+          {sortedProducts.map((p: any) => (
             <ProductCard key={p._id} product={p} layout={layout} />
           ))}
         </div>

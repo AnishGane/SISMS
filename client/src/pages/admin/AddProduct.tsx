@@ -275,7 +275,7 @@ const AddProduct = () => {
 
       <form onSubmit={handleSubmit} className="add_form space-y-6">
         {/* Basic Information */}
-        <div className="card bg-base-200 p-6 shadow">
+        <div className="card bg-base-200 p-6 rounded-md shadow">
           <h2 className="mb-4 text-xl font-semibold">Basic Information</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
