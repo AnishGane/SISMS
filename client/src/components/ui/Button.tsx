@@ -1,4 +1,5 @@
 import type { JSX } from 'react/jsx-runtime';
+import { motion } from 'motion/react';
 
 type ButtonProps = {
   icon?: JSX.Element;
@@ -13,7 +14,10 @@ const Button = ({ icon, text, title, children, disabled, onClick, className }: B
   const base =
     ' p-2 cursor-pointer font-medium flex gap-2 items-center justify-center tracking-wide rounded-md';
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.035 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 15 }}
       onClick={onClick}
       type="submit"
       disabled={disabled}
@@ -22,7 +26,7 @@ const Button = ({ icon, text, title, children, disabled, onClick, className }: B
     >
       {icon} {text}
       {children}
-    </button>
+    </motion.button>
   );
 };
 

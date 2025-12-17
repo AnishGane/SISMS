@@ -26,6 +26,7 @@ const AdminSchema = new mongoose.Schema(
 
     resetOTP: { type: String },
     resetOTPExpiry: { type: Date },
+    isNotificationEnabled: { type: Boolean, default: true },
 
     // optional metadata
     metadata: { type: mongoose.Schema.Types.Mixed },

@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-
 dotenv.config();
 
 // middlewares
@@ -20,6 +19,7 @@ import productRoutes from "./routes/shared/products.route.js";
 // import adminRoutes from "./routes/admin/admin.routes.js";
 import staffRoutes from "./routes/admin/staff.route.js";
 import dashboardRoute from "./routes/admin/dashboard.route.js";
+import settingRoutes from "./routes/shared/setting.route.js";
 // import suppliersRoutes from "./routes/admin/suppliers.routes.js";
 // import purchasesRoutes from "./routes/admin/purchases.routes.js";
 // import analyticsRoutes from "./routes/admin/analytics.routes.js";
@@ -40,6 +40,7 @@ app.use("/api/admin/dashboard", dashboardRoute);
 
 // shared
 app.use("/api/products", productRoutes);
+app.use("/api/settings", settingRoutes);
 // app.use("/api/orders", orderRoutes);
 // app.use("/api/search", searchRoutes);
 // app.use("/api/notifications", notificationRoutes);

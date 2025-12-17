@@ -11,7 +11,7 @@ import OTPModel from "../../models/otp.model.js";
 
 import { generateOTP } from "../../utils/generateOTP.js";
 import { sendOtpEmail } from "../../utils/emailSender.js";
-import { uploadToCloudinary } from "../../utils/helper.js";
+import { getUserModelByRole, isValidRole, uploadToCloudinary } from "../../utils/helper.js";
 
 const OTP_EXPIRES_MIN = Number(process.env.OTP_EXPIRES_MIN) || 15;
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret";
@@ -22,12 +22,6 @@ interface ResetTokenPayload extends jwt.JwtPayload {
   email: string;
   role: string;
 }
-
-const getUserModelByRole = (role: string) => {
-  if (role === "admin") return AdminModel;
-  if (role === "staff") return StaffModel;
-  return null;
-};
 
 // ADMIN LOGIN
 export const loginAdmin = async (req: Request, res: Response) => {
@@ -171,36 +165,40 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Valid email is required" });
     }
 
+    if (!isValidRole(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
     const User = getUserModelByRole(role);
-    if (!User) return res.status(400).json({ message: "Invalid role" });
+    if (!User) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
 
     const user = await User.findOne({ email });
+
+    // Security: do not leak existence
     if (!user) {
-      // for security, respond with success message even if email not found
       return res
         .status(200)
         .json({ message: "An OTP has been sent to your email." });
     }
 
-    // generate OTP
     const otpPlain = generateOTP(4);
     const otpHash = await bcrypt.hash(otpPlain, BCRYPT_SALT_ROUNDS);
-
-    // expire time
     const expiresAt = new Date(Date.now() + OTP_EXPIRES_MIN * 60 * 1000);
 
-    // remove any previous otps for this email+role
-    await OTPModel.updateMany({ email, role, used: false }, { used: true });
+    await OTPModel.updateMany(
+      { email, role, used: false },
+      { used: true }
+    );
 
-    const otpDoc = new OTPModel({
+    await OTPModel.create({
       email,
       role,
       otpHash,
       expiresAt,
     });
-    await otpDoc.save();
 
-    // send email
     await sendOtpEmail({
       to: email,
       otp: otpPlain,
@@ -214,6 +212,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 export const verifyOTP = async (req: Request, res: Response) => {
   try {
@@ -259,33 +258,41 @@ export const verifyOTP = async (req: Request, res: Response) => {
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token, newPassword } = req.body;
-    if (!token || !newPassword)
+
+    if (!token || !newPassword || newPassword.length < 6) {
       return res
         .status(400)
-        .json({ message: "Token and new password required" });
+        .json({ message: "Valid token and strong password required" });
+    }
 
-    // verify JWT
     let payload: ResetTokenPayload;
     try {
       payload = jwt.verify(token, JWT_SECRET) as ResetTokenPayload;
-    } catch (e) {
+    } catch {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
 
-    if (payload.purpose !== "password-reset")
+    if (payload.purpose !== "password-reset") {
       return res.status(400).json({ message: "Invalid token purpose" });
+    }
 
     const { email, role } = payload;
-    const User = getUserModelByRole(role);
-    if (!User)
+
+    if (!isValidRole(role)) {
       return res.status(400).json({ message: "Invalid role in token" });
+    }
 
-    // find user and update password
+    const User = getUserModelByRole(role);
+    if (!User) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    const hashed = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
-    user.password = hashed;
+    user.password = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
     await user.save();
 
     return res.status(200).json({ message: "Password updated successfully" });
@@ -294,3 +301,4 @@ export const resetPassword = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+

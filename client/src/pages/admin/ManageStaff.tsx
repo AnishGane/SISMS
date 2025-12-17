@@ -8,22 +8,16 @@ import ConfirmModal from '../../components/admin/ManageStaff/ConfirmModal';
 import Button from '../../components/ui/Button';
 import { emptyForm, type Staff, type StaffForm } from '../../types/staff';
 import toast from 'react-hot-toast';
+import { useAdmin } from '../../context/AdminContext';
 
 const ManageStaff = () => {
   const [staff, setStaff] = useState<Staff[]>([]);
-  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<StaffForm>(emptyForm);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
 
-  const [confirmConfig, setConfirmConfig] = useState<{
-    title: string;
-    message: string;
-    confirmText: string;
-    action: () => Promise<void>;
-  } | null>(null);
+  const { loading, setLoading, confirmConfig, setConfirmConfig, error, setError } = useAdmin();
 
   /* ---------------- FETCH STAFF ---------------- */
   const fetchStaff = async () => {

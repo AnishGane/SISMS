@@ -2,28 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
-
-export interface DashboardData {
-  staffCount: number;
-  productCount: number;
-  lowStockCount: number;
-  totalRevenue: number;
-  monthlySales: number;
-}
-
-interface StockCategory {
-  category: string;
-  stock: number;
-}
-
-interface AdminContextType {
-  dashboardData: DashboardData | null;
-  loading: boolean;
-  error: string | null;
-  avatarUrl: string;
-  stockCategoryData: StockCategory[];
-  fetchDashboardData: () => Promise<void>;
-}
+import type { AdminContextType, DashboardData, StockCategory } from '../types/admin';
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
@@ -33,6 +12,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const avatarUrl = JSON.parse(localStorage.getItem('user') || '{}').avatar;
+
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    message: string;
+    confirmText: string;
+    action: () => Promise<void>;
+  } | null>(null);
 
   // To fetch dashboard data for Summary cards
   const fetchDashboardData = useCallback(async () => {
@@ -68,7 +54,18 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AdminContext.Provider
-      value={{ dashboardData, stockCategoryData, avatarUrl, loading, error, fetchDashboardData }}
+      value={{
+        dashboardData,
+        stockCategoryData,
+        avatarUrl,
+        confirmConfig,
+        setConfirmConfig,
+        setLoading,
+        loading,
+        error,
+        setError,
+        fetchDashboardData,
+      }}
     >
       {children}
     </AdminContext.Provider>
