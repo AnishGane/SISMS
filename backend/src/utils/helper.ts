@@ -1,6 +1,25 @@
 import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary";
 import streamifier from "streamifier";
+import AdminModel from "../models/admin.model";
+import StaffModel from "../models/staff.model";
+import { Model } from "mongoose";
+
+type UserRole = "admin" | "staff";
+
+export const getUserModelByRole = (role: UserRole): Model<any> => {
+  switch (role) {
+    case "admin":
+      return AdminModel;
+    case "staff":
+      return StaffModel;
+    default:
+      throw new Error("Invalid user role");
+  }
+};
+
+export const isValidRole = (role: any): role is "admin" | "staff" =>
+  role === "admin" || role === "staff";
 
 // To add it in create sales of staff
 export const calculateAvgDailySales = (totalSold: number, createdAt: Date) => {
