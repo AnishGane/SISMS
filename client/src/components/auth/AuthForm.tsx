@@ -1,7 +1,8 @@
-import React from "react";
-import Input from "../ui/AuthInput";
-import { useAuth } from "../../context/AuthContext";
-import Button from "../ui/Button";
+import React from 'react';
+import Input from '../ui/AuthInput';
+import { useAuth } from '../../context/AuthContext';
+import Button from '../ui/Button';
+import ProfilePhotoSelector from '../ui/ProfilePhotoSelector';
 
 type Field = {
   label: string;
@@ -32,18 +33,23 @@ const AuthForm = ({
   onSubmit,
   showForgotPassword,
   forgotPasswordPath,
-  
 }: AuthFormProps) => {
-  const {handleChange} = useAuth();
-  return (
-    <div className="w-full max-w-xl mx-auto p-8">
-      <h2 className="text-3xl font-semibold text-gray-900 text-center mb-1">
-        {title}
-      </h2>
+  const { handleChange, formData, setFormData } = useAuth();
 
-      <p className="text-center text-gray-500 text-sm mb-10">{subtitle}</p>
+  const getRegisterFromURL = window.location.pathname.includes('register') ? true : false;
+  return (
+    <div className="mx-auto w-full max-w-xl p-8">
+      <h2 className="mb-1 text-center text-3xl font-semibold text-gray-900">{title}</h2>
+
+      <p className="mb-10 text-center text-sm text-gray-500">{subtitle}</p>
 
       <form onSubmit={onSubmit} className="space-y-5">
+        {getRegisterFromURL && (
+          <ProfilePhotoSelector
+            image={formData.avatar ?? null}
+            onChange={(img) => setFormData((prev) => ({ ...prev, avatar: img }))}
+          />
+        )}
 
         {/* Normal fields */}
         {fields.map((field) => (
@@ -56,9 +62,8 @@ const AuthForm = ({
             onChange={handleChange}
             showForgotPassword={showForgotPassword}
             forgotPasswordPath={forgotPasswordPath}
-           required
+            required
           />
-          
         ))}
 
         {/* Store section in 2-column grid */}
@@ -84,14 +89,10 @@ const AuthForm = ({
         >
           {buttonText}
         </button> */}
-        <Button text={buttonText} variant="primary" />
+        <Button text={buttonText} title="Submit" />
       </form>
 
-      {bottomLinks && (
-        <div className="mt-6 text-center text-sm text-gray-500">
-          {bottomLinks}
-        </div>
-      )}
+      {bottomLinks && <div className="mt-6 text-center text-sm text-gray-500">{bottomLinks}</div>}
     </div>
   );
 };

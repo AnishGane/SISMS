@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState } from "react";
-import { API_PATHS } from "../utils/apiPath";
-import axiosInstance from "../utils/axiosInstance";
-import toast from "react-hot-toast";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { createContext, useContext, useState } from 'react';
+import { API_PATHS } from '../utils/apiPath';
+import axiosInstance from '../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface FormData {
   name?: string;
@@ -11,6 +11,7 @@ interface FormData {
   phone?: string;
   storeName?: string;
   storeAddress?: string;
+  avatar?: string | File | null;
 }
 
 interface AuthContextType {
@@ -19,14 +20,13 @@ interface AuthContextType {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setError: React.Dispatch<React.SetStateAction<string | null>>;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   error: string | null;
   forgotPasswordLink: boolean;
   navigate: any;
   location: any;
 
-  handleChange: (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   resetForm: () => void;
 
@@ -48,15 +48,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-
-const getLoginfromURL = () => {
-  const loginURL = window.location.pathname;
-  if (loginURL.includes("login")) {
-    setForgotPasswordLink(true);
-  } else {
-    setForgotPasswordLink(false);
-  }
-};
+  const getLoginfromURL = () => {
+    const loginURL = window.location.pathname;
+    if (loginURL.includes('login')) {
+      setForgotPasswordLink(true);
+    } else {
+      setForgotPasswordLink(false);
+    }
+  };
 
   // Update form data
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,18 +74,24 @@ const getLoginfromURL = () => {
   const registerAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
-      const res = await axiosInstance.post(
-        API_PATHS.AUTH.REGISTER_ADMIN,
-        formData
-      );
+      const fd = new FormData();
 
-      console.log(res.data.message);
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          fd.append(key, value);
+        }
+      });
+
+      await axiosInstance.post(API_PATHS.AUTH.REGISTER_ADMIN, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
       resetForm();
+      toast.success('Registration successful');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Registration failed");
+      toast.error(err.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -99,23 +104,19 @@ const getLoginfromURL = () => {
     setError(null);
 
     try {
-      const res = await axiosInstance.post(
-        API_PATHS.AUTH.LOGIN_ADMIN,
-        formData
-      );
+      const res = await axiosInstance.post(API_PATHS.AUTH.LOGIN_ADMIN, formData);
 
-      const {token, admin} = res.data;
-      if(token) {
+      const { token, admin } = res.data;
+      if (token) {
         localStorage.setItem('token', token);
-        localStorage.setItem('username', admin.name);
-        localStorage.setItem('role', "admin");
-        toast.success("Login successful");
+        localStorage.setItem('user', JSON.stringify(admin));
+        toast.success('Login successful');
       }
 
-      if(admin){
-          setUser(admin);
+      if (admin) {
+        setUser(admin);
       }
-      navigate("/admin/dashboard");
+      navigate('/admin/dashboard');
       resetForm();
     } catch (err: any) {
       toast.error(err.response?.data?.message);
@@ -124,38 +125,38 @@ const getLoginfromURL = () => {
     }
   };
 
-//   Staff Login handler
-const staffLogin = async (e: React.FormEvent) => {
+  //   Staff Login handler
+  const staffLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-        const res = await axiosInstance.post(API_PATHS.AUTH.LOGIN_STAFF, formData);
+      const res = await axiosInstance.post(API_PATHS.AUTH.LOGIN_STAFF, formData);
 
-        const {token, staff} = res.data;
-        if(token){
-            localStorage.setItem('token', token);
-            localStorage.setItem('staff_username', staff.name);
-            localStorage.setItem('role', "staff");
-            toast.success("Login successful");
-        }
-        if(staff){
-            setUser(staff);
-        }
-        resetForm();
-        // navigate('/admin/register');
+      const { token, staff } = res.data;
+      if (token) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(staff));
+        toast.success('Login successful');
+      }
+      if (staff) {
+        setUser(staff);
+      }
+      resetForm();
+      // navigate('/admin/register');
     } catch (error: any) {
-        toast.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-}
+  };
 
   return (
     <AuthContext.Provider
       value={{
         formData,
+        setFormData,
         user,
         loading,
         setLoading,
@@ -179,6 +180,6 @@ const staffLogin = async (e: React.FormEvent) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
 };

@@ -7,7 +7,7 @@ type WelcomeHeaderProps = {
 };
 
 const WelcomeHeader = ({ text, subText, avatarUrl }: WelcomeHeaderProps) => {
-  const username = localStorage.getItem('username');
+  const username = JSON.parse(localStorage.getItem('user') || '{}').name;
   return (
     <div className="text-base-content bg-base-200/50 flex w-full items-center justify-between rounded-md p-4 shadow-sm">
       <div className="flex flex-col">

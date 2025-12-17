@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import StaffModel from "../../models/staff.model.js";
+import { uploadToCloudinary } from "../../utils/helper.js";
 
 // Extend Request type to include user injected by auth middleware
 interface AuthRequest extends Request {
@@ -14,7 +15,8 @@ interface AuthRequest extends Request {
 
 export const createStaff = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, email, password, phone, avatar } = req.body;
+    const { name, email, password, phone } = req.body;
+    const file = req.file;
 
     // Required fields
     if (!name || !email || !password) {
@@ -23,8 +25,10 @@ export const createStaff = async (req: AuthRequest, res: Response) => {
         .json({ message: "Name, email & password are required" });
     }
 
-    if (avatar && !validator.isURL(avatar)) {
-      return res.status(400).json({ message: "Invalid avatar URL" });
+    let avatarUrl: string | undefined;
+
+    if (file) {
+      avatarUrl = await uploadToCloudinary(file);
     }
 
     if (!validator.isEmail(email)) {
@@ -60,7 +64,7 @@ export const createStaff = async (req: AuthRequest, res: Response) => {
       email,
       password: hashed,
       phone,
-      avatar,
+      avatar: avatarUrl,
       store: req.user._id,
     });
 
@@ -132,7 +136,9 @@ export const toggleStatus = async (req: AuthRequest, res: Response) => {
 export const updateStaff = async (req: AuthRequest, res: Response) => {
   try {
     const staffId = req.params.id;
-    const { name, email, password, phone, avatar, isActive } = req.body;
+    const { name, email, password, phone, isActive } = req.body;
+    const file = req.file;
+    let avatarUrl: string | undefined;
 
     if (!req.user?._id) {
       return res.status(401).json({ message: "Unauthorized (missing user)" });
@@ -160,12 +166,12 @@ export const updateStaff = async (req: AuthRequest, res: Response) => {
       }
       updateData.phone = phone;
     }
-    if (avatar !== undefined) {
-      if (avatar && !validator.isURL(avatar)) {
-        return res.status(400).json({ message: "Invalid avatar URL" });
-      }
-      updateData.avatar = avatar;
+    
+    if (file) {
+      avatarUrl = await uploadToCloudinary(file);
+      updateData.avatar = avatarUrl;
     }
+
     if (isActive !== undefined) updateData.isActive = isActive;
 
     // Handle email update

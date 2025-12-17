@@ -1,3 +1,5 @@
+import Button from '../../ui/Button';
+
 interface Props {
   open: boolean;
   title: string;
@@ -24,12 +26,13 @@ const ConfirmModal: React.FC<Props> = ({
         <p className="py-4">{message}</p>
 
         <div className="modal-action">
-          <button className="btn btn-ghost" onClick={onCancel}>
-            No
-          </button>
-          <button className="btn btn-error text-white" onClick={onConfirm}>
-            {confirmText}
-          </button>
+          <Button text="No" title="Cancel" className="btn btn-ghost" onClick={onCancel} />
+          <Button
+            title={confirmText}
+            text={confirmText}
+            className="btn btn-error text-white"
+            onClick={onConfirm}
+          />
         </div>
       </div>
 

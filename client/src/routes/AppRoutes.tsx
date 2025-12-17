@@ -3,7 +3,7 @@ import AdminRoutes from './AdminRoutes';
 import StaffRoutes from './StaffRoutes';
 import AuthRoutes from './AuthRoutes';
 import NotFound from '../pages/shared/NotFound';
-import LandingPage from '../pages/LandingPage';
+import LandingPage from '../pages/shared/LandingPage';
 import PublicRoute from '../middlewares/PublicRoutes';
 
 const AppRoutes = () => (

@@ -7,12 +7,13 @@ import {
   verifyOTP,
   resetPassword,
 } from "../../controller/shared/auth.controller.js";
+import upload from "../../middlewares/multer.js";
 
 const authRoutes = express.Router();
 
 authRoutes.post("/login-staff", loginStaff);
 authRoutes.post("/login-admin", loginAdmin);
-authRoutes.post("/register-admin", registerAdmin);
+authRoutes.post("/register-admin", upload.single("avatar"), registerAdmin);
 
 // POST /api/auth/:role/forgot-password
 authRoutes.post("/:role/forgot-password", forgotPassword);

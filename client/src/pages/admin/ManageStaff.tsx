@@ -2,18 +2,12 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPath';
-import { Edit2, Trash2, User2, UserCheck, UserX } from 'lucide-react';
+import { Edit2, Trash2, User2, UserCheck, UserPlus, UserX } from 'lucide-react';
 import StaffFormModal from '../../components/admin/ManageStaff/StaffFormModal';
 import ConfirmModal from '../../components/admin/ManageStaff/ConfirmModal';
-
-interface Staff {
-  _id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  isActive: boolean;
-  avatar?: string;
-}
+import Button from '../../components/ui/Button';
+import { emptyForm, type Staff, type StaffForm } from '../../types/staff';
+import toast from 'react-hot-toast';
 
 const ManageStaff = () => {
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -21,81 +15,22 @@ const ManageStaff = () => {
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    avatar: '',
-  });
-
+  const [form, setForm] = useState<StaffForm>(emptyForm);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
     message: string;
     confirmText: string;
-    action: () => Promise<void> | void;
+    action: () => Promise<void>;
   } | null>(null);
 
-  const openEdit = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setForm({
-      name: staff.name,
-      email: staff.email,
-      password: '', // Password is empty for edit, user can update if needed
-      phone: staff.phone || '',
-      avatar: staff.avatar || '',
-    });
-    setShowModal(true);
-  };
-
-  const openAdd = () => {
-    setSelectedStaff(null);
-    setForm({
-      name: '',
-      email: '',
-      password: '',
-      phone: '',
-      avatar: '',
-    });
-    setShowModal(true);
-  };
-
-  const toggleStatus = (staff: Staff) => {
-    setConfirmConfig({
-      title: staff.isActive ? 'Deactivate Staff' : 'Activate Staff',
-      message: staff.isActive
-        ? `Are you sure you want to deactivate ${staff.name}? They will no longer be able to log in.`
-        : `Do you want to activate ${staff.name}? They will regain access.`,
-      confirmText: staff.isActive ? 'Deactivate' : 'Activate',
-      action: async () => {
-        await axiosInstance.patch(API_PATHS.ADMIN.STAFF.TOGGLE_STATUS(staff._id));
-        setConfirmConfig(null);
-        fetchStaff();
-      },
-    });
-  };
-
-  const deleteStaff = (staff: Staff) => {
-    setConfirmConfig({
-      title: 'Delete Staff',
-      message: `Are you sure you want to permanently delete ${staff.name}? This action cannot be undone.`,
-      confirmText: 'Delete',
-      action: async () => {
-        await axiosInstance.delete(API_PATHS.ADMIN.STAFF.DELETE_STAFF(staff._id));
-        setConfirmConfig(null);
-        fetchStaff();
-      },
-    });
-  };
-
+  /* ---------------- FETCH STAFF ---------------- */
   const fetchStaff = async () => {
     try {
       setLoading(true);
       const res = await axiosInstance.get(API_PATHS.ADMIN.STAFF.GET_STAFFS);
       setStaff(res.data.staff || []);
-    } catch (err) {
-      console.error('Failed to fetch staff', err);
     } finally {
       setLoading(false);
     }
@@ -105,51 +40,120 @@ const ManageStaff = () => {
     fetchStaff();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  /* ---------------- OPEN MODALS ---------------- */
+  const openAdd = () => {
+    setSelectedStaff(null);
+    setForm(emptyForm);
+    setShowModal(true);
   };
 
+  const openEdit = (s: Staff) => {
+    setSelectedStaff(s);
+    setForm({
+      name: s.name,
+      email: s.email,
+      password: '',
+      phone: s.phone || '',
+      avatar: s.avatar ?? null,
+    });
+    setShowModal(true);
+  };
+
+  /* ---------------- FORM CHANGE ---------------- */
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  /* ---------------- CREATE ---------------- */
   const handleCreateStaff = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
     setSubmitting(true);
+    setError(null);
+
     try {
-      await axiosInstance.post(API_PATHS.ADMIN.STAFF.CREATE_STAFF, form);
+      const fd = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          fd.append(key, value as any);
+        }
+      });
+
+      await axiosInstance.post(API_PATHS.ADMIN.STAFF.CREATE_STAFF, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
       setShowModal(false);
-      setForm({ name: '', email: '', password: '', phone: '', avatar: '' });
-      setError(null);
+      setForm(emptyForm);
+      toast.success('Staff created successfully');
       await fetchStaff();
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || 'Failed to create staff. Please try again.';
-      setError(errorMessage);
-      console.error('Create staff failed', err);
+      setError(err.response?.data?.message || 'Failed to create staff');
     } finally {
       setSubmitting(false);
     }
   };
 
+  /* ---------------- UPDATE ---------------- */
   const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedStaff) return;
 
-    setError(null);
     setSubmitting(true);
+    setError(null);
+
     try {
-      await axiosInstance.put(API_PATHS.ADMIN.STAFF.UPDATE_STAFF(selectedStaff._id), form);
+      const fd = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          fd.append(key, value as any);
+        }
+      });
+
+      await axiosInstance.put(API_PATHS.ADMIN.STAFF.UPDATE_STAFF(selectedStaff._id), fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
       setShowModal(false);
       setSelectedStaff(null);
-      setForm({ name: '', email: '', password: '', phone: '', avatar: '' });
-      setError(null);
+      setForm(emptyForm);
+      toast.success('Staff updated successfully');
       await fetchStaff();
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || 'Failed to update staff. Please try again.';
-      setError(errorMessage);
-      console.error('Update staff failed', err);
+      setError(err.response?.data?.message || 'Failed to update staff');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  /* ---------------- TOGGLE STATUS ---------------- */
+  const toggleStatus = (s: Staff) => {
+    setConfirmConfig({
+      title: s.isActive ? 'Deactivate Staff' : 'Activate Staff',
+      message: s.isActive ? `Deactivate ${s.name}?` : `Activate ${s.name}?`,
+      confirmText: s.isActive ? 'Deactivate' : 'Activate',
+      action: async () => {
+        await axiosInstance.patch(API_PATHS.ADMIN.STAFF.TOGGLE_STATUS(s._id));
+        setConfirmConfig(null);
+        toast.success(`${s.name} ${s.isActive ? 'deactivated' : 'activated'} successfully`);
+        fetchStaff();
+      },
+    });
+  };
+
+  /* ---------------- DELETE ---------------- */
+  const deleteStaff = (s: Staff) => {
+    setConfirmConfig({
+      title: 'Delete Staff',
+      message: `Delete ${s.name}? This cannot be undone.`,
+      confirmText: 'Delete',
+      action: async () => {
+        await axiosInstance.delete(API_PATHS.ADMIN.STAFF.DELETE_STAFF(s._id));
+        setConfirmConfig(null);
+        toast.success(`${s.name} deleted successfully`);
+        fetchStaff();
+      },
+    });
   };
 
   return (
@@ -161,10 +165,13 @@ const ManageStaff = () => {
         submitting={submitting}
         error={error}
         form={form}
+        setForm={setForm}
         onChange={handleChange}
         onClose={() => {
           setShowModal(false);
           setSelectedStaff(null);
+          setForm(emptyForm);
+          setError(null);
         }}
         onSubmit={selectedStaff ? handleEdit : handleCreateStaff}
       />
@@ -185,18 +192,22 @@ const ManageStaff = () => {
           <p className="text-[13px] text-gray-500">Create and manage staff accounts</p>
         </div>
 
-        <button className="btn bg-neutral rounded-md font-medium" onClick={openAdd}>
-          + Add Staff
-        </button>
+        <Button
+          title="Add Staff"
+          icon={<UserPlus size={17} />}
+          className="btn bg-primary rounded-md p-3 font-medium"
+          text="Add Staff"
+          onClick={openAdd}
+        />
       </div>
 
       {/* Table */}
       <div className="card bg-base-100 shadow">
         <div className="card-body p-0">
           <div className="overflow-x-auto">
-            <table className="table-zebra table border overflow-hidden border-neutral rounded-md">
+            <table className="table-zebra border-neutral table overflow-hidden rounded-md border">
               <thead>
-                <tr className="text-neutral-content bg-base-300 ">
+                <tr className="text-neutral-content bg-base-300">
                   <th>Profile Image</th>
                   <th>Name</th>
                   <th>Email</th>
@@ -244,11 +255,11 @@ const ManageStaff = () => {
                       </td>
 
                       <td className="flex items-center justify-center gap-1 group-hover:cursor-pointer">
-                        <Button title="Edit staff" onClick={() => openEdit(s)}>
+                        <ActionBtn title="Edit staff" onClick={() => openEdit(s)}>
                           <Edit2 size={17} />
-                        </Button>
+                        </ActionBtn>
 
-                        <Button
+                        <ActionBtn
                           title={'Toggle ' + (s.isActive ? 'Deactivate' : 'Activate')}
                           onClick={() => toggleStatus(s)}
                         >
@@ -257,11 +268,11 @@ const ManageStaff = () => {
                           ) : (
                             <UserCheck size={17} className="text-success" />
                           )}
-                        </Button>
+                        </ActionBtn>
 
-                        <Button title="Delete staff" onClick={() => deleteStaff(s)}>
+                        <ActionBtn title="Delete staff" onClick={() => deleteStaff(s)}>
                           <Trash2 size={17} className="text-error" />
-                        </Button>
+                        </ActionBtn>
                       </td>
                     </tr>
                   ))
@@ -275,7 +286,7 @@ const ManageStaff = () => {
   );
 };
 
-const Button = ({
+const ActionBtn = ({
   children,
   title,
   onClick,

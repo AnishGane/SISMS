@@ -24,7 +24,6 @@ export const sendOtpEmail = async ({
     throw new Error("RESEND_API_KEY is not set");
   }
 
-  // MUST AWAIT THIS (fixes your Promise<string> error)
   const html: string = await render(
     OTPEmail({
       otp,

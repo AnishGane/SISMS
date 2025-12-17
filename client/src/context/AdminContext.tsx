@@ -11,10 +11,17 @@ export interface DashboardData {
   monthlySales: number;
 }
 
+interface StockCategory {
+  category: string;
+  stock: number;
+}
+
 interface AdminContextType {
   dashboardData: DashboardData | null;
   loading: boolean;
   error: string | null;
+  avatarUrl: string;
+  stockCategoryData: StockCategory[];
   fetchDashboardData: () => Promise<void>;
 }
 
@@ -22,8 +29,10 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [stockCategoryData, setStockCategoryData] = useState<StockCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const avatarUrl = JSON.parse(localStorage.getItem('user') || '{}').avatar;
 
   // To fetch dashboard data for Summary cards
   const fetchDashboardData = useCallback(async () => {
@@ -41,12 +50,26 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const fetchStockCategoryData = useCallback(async () => {
+    try {
+      const res = await axiosInstance.get(API_PATHS.ADMIN.DASHBOARD.GET_STOCK_BY_CATEGORY);
+      setStockCategoryData(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchDashboardData();
+    fetchStockCategoryData();
   }, []);
 
   return (
-    <AdminContext.Provider value={{ dashboardData, loading, error, fetchDashboardData }}>
+    <AdminContext.Provider
+      value={{ dashboardData, stockCategoryData, avatarUrl, loading, error, fetchDashboardData }}
+    >
       {children}
     </AdminContext.Provider>
   );

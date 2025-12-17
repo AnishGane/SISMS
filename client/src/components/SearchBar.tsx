@@ -1,5 +1,6 @@
 import { Grid, Plus, Search, Table2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 
 interface SearchBarProps {
   search: string;
@@ -41,16 +42,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <div className="flex items-center gap-8">
         <div>
           <Link to={'/admin/products/new'}>
-            <div
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
               title="Add New Product"
               className="cursor-pointer rounded-full bg-[#ff7477] p-1 text-white"
             >
               <Plus />
-            </div>
+            </motion.div>
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
             title="Grid Layout"
             onClick={() => onLayoutChange('grid')}
             className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
@@ -60,9 +67,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
             }`}
           >
             <Grid />
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
             title="Table Layout"
             onClick={() => onLayoutChange('table')}
             className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
@@ -72,7 +82,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             }`}
           >
             <Table2 />
-          </button>
+          </motion.button>
 
           <select
             value={category}

@@ -22,9 +22,9 @@ const SummaryCards = () => {
       <div className="flex items-center justify-between">
         <Heading text1="Summary" text2="Get a quick overview" />
         <Button
+          title="Refresh"
           icon={<RefreshCcw size={17} />}
-          className="rounded-full"
-          variant="secondary"
+          className="rounded-full bg-neutral/50"
           onClick={fetchDashboardData}
         />
       </div>

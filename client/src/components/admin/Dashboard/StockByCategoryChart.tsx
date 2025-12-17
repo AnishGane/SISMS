@@ -1,12 +1,12 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { useStockByCategory } from '../../../hooks/useStockByCategory';
 import CustomTooltip from '../../ui/CustomTooltip';
 import Heading from '../../Heading';
+import { useAdmin } from '../../../context/AdminContext';
 
 const COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EC4899', '#3B82F6', '#8B5CF6'];
 
 export default function StockByCategoryChart() {
-  const { data, loading } = useStockByCategory();
+  const { stockCategoryData, loading } = useAdmin();
 
   if (loading) return <StockByCategorySkeleton />;
 
@@ -18,14 +18,14 @@ export default function StockByCategoryChart() {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             layout="vertical"
-            data={data}
+            data={stockCategoryData}
             margin={{ top: 10, right: 30, left: 40, bottom: 10 }}
           >
             <XAxis type="number" />
             <YAxis dataKey="category" type="category" width={65} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
             <Bar dataKey="stock" radius={[0, 8, 8, 0]}>
-              {data.map((_, index) => (
+              {stockCategoryData.map((_, index) => (
                 <Cell key={index} fill={COLORS[index % COLORS.length]} />
               ))}
             </Bar>

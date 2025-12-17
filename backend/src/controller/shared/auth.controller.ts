@@ -11,6 +11,7 @@ import OTPModel from "../../models/otp.model.js";
 
 import { generateOTP } from "../../utils/generateOTP.js";
 import { sendOtpEmail } from "../../utils/emailSender.js";
+import { uploadToCloudinary } from "../../utils/helper.js";
 
 const OTP_EXPIRES_MIN = Number(process.env.OTP_EXPIRES_MIN) || 15;
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret";
@@ -119,8 +120,8 @@ export const loginStaff = async (req: Request, res: Response) => {
 // REGISTER ADMIN
 export const registerAdmin = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, storeName, storeAddress, avatar, phone } =
-      req.body;
+    const { name, email, password, storeName, storeAddress, phone } = req.body;
+    const file = req.file;
 
     if (!name || !email || !password || !storeName || !storeAddress) {
       return res.status(400).json({ message: "All fields are required" });
@@ -131,22 +132,13 @@ export const registerAdmin = async (req: Request, res: Response) => {
     }
 
     if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "Password must be at least 6 characters" });
+      return res.status(400).json({ message: "Password too short" });
     }
 
-    if (phone && !validator.isMobilePhone(phone)) {
-      return res.status(400).json({ message: "Invalid phone number" });
-    }
+    let avatarUrl: string | undefined;
 
-    if (avatar && !validator.isURL(avatar)) {
-      return res.status(400).json({ message: "Invalid avatar URL" });
-    }
-
-    const exists = await AdminModel.findOne({ email });
-    if (exists) {
-      return res.status(400).json({ message: "Email already used" });
+    if (file) {
+      avatarUrl = await uploadToCloudinary(file);
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -157,8 +149,8 @@ export const registerAdmin = async (req: Request, res: Response) => {
       password: hashed,
       storeName,
       storeAddress,
-      avatar,
       phone,
+      avatar: avatarUrl,
     });
 
     res.status(201).json({
@@ -166,7 +158,6 @@ export const registerAdmin = async (req: Request, res: Response) => {
       admin,
     });
   } catch (error: any) {
-    console.error("Error registering admin:", error);
     res.status(500).json({ message: error.message });
   }
 };
