@@ -1,14 +1,15 @@
 import { LucideTrash, LucideUpload, LucideUser } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
-type ImageValue = string | File | null;
+export type ImageValue = string | File | null;
 
 type Props = {
   image: ImageValue;
   onChange: (image: ImageValue) => void;
+  isEditting?: boolean;
 };
 
-const ProfilePhotoSelector: React.FC<Props> = ({ image, onChange }) => {
+const ProfilePhotoSelector: React.FC<Props> = ({ image, onChange, isEditting = true }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -64,14 +65,16 @@ const ProfilePhotoSelector: React.FC<Props> = ({ image, onChange }) => {
       ) : (
         <div className="relative">
           <img src={previewUrl} className="size-20 rounded-full object-cover" />
-          <button
-            type="button"
-            title="Remove profile photo"
-            className="bg-error absolute -right-1 -bottom-1 flex size-8 cursor-pointer items-center justify-center rounded-full text-white"
-            onClick={handleRemove}
-          >
-            <LucideTrash size={18} />
-          </button>
+          {isEditting && (
+            <button
+              type="button"
+              title="Remove profile photo"
+              className="bg-error absolute -right-1 -bottom-1 flex size-8 cursor-pointer items-center justify-center rounded-full text-white"
+              onClick={handleRemove}
+            >
+              <LucideTrash size={18} />
+            </button>
+          )}
         </div>
       )}
     </div>

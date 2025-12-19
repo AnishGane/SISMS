@@ -12,6 +12,7 @@ interface FormData {
   storeName?: string;
   storeAddress?: string;
   avatar?: string | File | null;
+  _id?: string;
 }
 
 interface AuthContextType {
@@ -25,6 +26,9 @@ interface AuthContextType {
   forgotPasswordLink: boolean;
   navigate: any;
   location: any;
+
+  clearUser: () => void;
+  updateUser: (userData: FormData) => void;
 
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
@@ -47,6 +51,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [forgotPasswordLink, setForgotPasswordLink] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Function to update the user data
+  const updateUser = (userData: FormData) => {
+    setUser(userData);
+
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
+  // Function to clear the user data when logged out
+  const clearUser = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/admin/auth/login');
+  };
 
   const getLoginfromURL = () => {
     const loginURL = window.location.pathname;
@@ -109,7 +128,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { token, admin } = res.data;
       if (token) {
         localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(admin));
+        updateUser(admin);
         toast.success('Login successful');
       }
 
@@ -137,7 +156,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { token, staff } = res.data;
       if (token) {
         localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(staff));
+        updateUser(staff);
         toast.success('Login successful');
       }
       if (staff) {
@@ -162,6 +181,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading,
         setError,
         error,
+        clearUser,
+        updateUser,
         forgotPasswordLink,
         navigate,
         location,

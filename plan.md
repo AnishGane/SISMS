@@ -1,501 +1,624 @@
-<!-- import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import ThemeSelection from '../../components/ThemeSelection';
+import { User, Store, Bell, Shield, Save, Pen, X, Trash2 } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPath';
-import { Edit2, Trash2, User2, UserCheck, UserX } from 'lucide-react';
-import StaffFormModal from './StaffFormModal';
-import ConfirmModal from './ConfirmModal';
+import { useAdmin } from '../../context/AdminContext';
+import Button from '../../components/ui/Button';
+import ConfirmModal from '../../components/admin/ManageStaff/ConfirmModal';
+import toast from 'react-hot-toast';
+import ProfilePhotoSelector from '../../components/ui/ProfilePhotoSelector';
+import type { ImageValue } from '../../types/staff';
 
-interface Staff {
-  _id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  isActive: boolean;
-  avatar?: string;
-}
-
-const ManageStaff = () => {
-  const [staff, setStaff] = useState<Staff[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const AdminSettings = () => {
+  const [avatarPreview, setAvatarPreview] = useState<ImageValue>(null);
   const [form, setForm] = useState({
+    _id: '',
     name: '',
     email: '',
-    password: '',
     phone: '',
     avatar: '',
+    storeName: '',
+    storeAddress: '',
+    storeCurrency: 'NPR',
+    timezone: 'Asia/Kathmandu',
+    isNotificationEnabled: false,
   });
+  const { loading, setLoading, confirmConfig, setConfirmConfig } = useAdmin();
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
-
-  const openEdit = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setForm({
-      name: staff.name,
-      email: staff.email,
-      password: '', // Password is empty for edit, user can update if needed
-      phone: staff.phone || '',
-      avatar: staff.avatar || '',
-    });
-    setShowModal(true);
+  const handleChange = (e: any) => {
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
   };
 
-  const toggleStatus = async (staff: Staff) => {
-    setConfirmAction(() => async () => {
-      await axiosInstance.patch(API_PATHS.ADMIN.STAFF.TOGGLE_STATUS(staff._id));
-      setConfirmOpen(false);
-      fetchStaff();
-    });
-    setConfirmOpen(true);
-  };
-
-  const deleteStaff = async (id: string) => {
-    setConfirmAction(() => async () => {
-      await axiosInstance.delete(API_PATHS.ADMIN.STAFF.DELETE_STAFF(id));
-      setConfirmOpen(false);
-      fetchStaff();
-    });
-    setConfirmOpen(true);
-  };
-
-  const fetchStaff = async () => {
+  const fetchUserSettingData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axiosInstance.get(API_PATHS.ADMIN.STAFF.GET_STAFFS);
-      setStaff(res.data.staff || []);
+      const res = await axiosInstance.get(API_PATHS.ADMIN.SETTING.GET_SETTING);
+      setLoading(false);
+      setForm(res.data.data);
+      console.log(res.data.data);
     } catch (err) {
-      console.error('Failed to fetch staff', err);
+      setLoading(false);
+      console.log(err);
+    }
+  };
+
+  const handleUpdate = async () => {
+    setLoading(true);
+    try {
+      const fd = new FormData();
+
+      // append text fields
+      Object.entries(form).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && key !== 'avatar') {
+          fd.append(key, String(value));
+        }
+      });
+
+      // append avatar file if selected
+      if (avatarPreview instanceof File) {
+        fd.append('avatar', avatarPreview);
+      }
+
+      const res = await axiosInstance.put(API_PATHS.ADMIN.SETTING.UPDATE_SETTING(form._id), fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setForm(res.data.data);
+      setAvatarPreview(null);
+      setIsEditing(false);
+      toast.success('Profile updated successfully');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update profile');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDelete = async () => {
+    setConfirmConfig({
+      title: 'Delete Staff',
+      message: `Delete this account? This cannot be undone.`,
+      confirmText: 'Delete',
+      action: async () => {
+        await axiosInstance.delete(API_PATHS.ADMIN.SETTING.DELETE_SETTING(form._id));
+        setConfirmConfig(null);
+        toast.success('Account deleted successfully');
+      },
+    });
+  };
+
   useEffect(() => {
-    fetchStaff();
+    fetchUserSettingData();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleCreateStaff = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      await axiosInstance.post(API_PATHS.ADMIN.STAFF.CREATE_STAFF, form);
-      setShowModal(false);
-      setForm({ name: '', email: '', password: '', phone: '', avatar: '' });
-      setError(null);
-      await fetchStaff();
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || 'Failed to create staff. Please try again.';
-      setError(errorMessage);
-      console.error('Create staff failed', err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedStaff) return;
-
-    setError(null);
-    setSubmitting(true);
-    try {
-      await axiosInstance.put(API_PATHS.ADMIN.STAFF.UPDATE_STAFF(selectedStaff._id), form);
-      setShowModal(false);
-      setSelectedStaff(null);
-      setForm({ name: '', email: '', password: '', phone: '', avatar: '' });
-      setError(null);
-      await fetchStaff();
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || 'Failed to update staff. Please try again.';
-      setError(errorMessage);
-      console.error('Update staff failed', err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AdminLayout>
-      <StaffFormModal
-        open={showModal}
-        title={selectedStaff ? 'Edit Staff' : 'Add Staff'}
-        isEdit={!!selectedStaff}
-        submitting={submitting}
-        error={error}
-        form={form}
-        onChange={handleChange}
-        onClose={() => {
-          setShowModal(false);
-          setSelectedStaff(null);
-        }}
-        onSubmit={selectedStaff ? handleEdit : handleCreateStaff}
-      />
-
       <ConfirmModal
-        open={confirmOpen}
-        title="Confirm Action"
-        message="Are you sure you want to proceed?"
-        onCancel={() => setConfirmOpen(false)}
-        onConfirm={confirmAction}
+        open={!!confirmConfig}
+        title={confirmConfig?.title || ''}
+        message={confirmConfig?.message || ''}
+        confirmText={confirmConfig?.confirmText}
+        onCancel={() => setConfirmConfig(null)}
+        onConfirm={confirmConfig?.action || (() => {})}
       />
-
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Manage Staff</h1>
-          <p className="text-sm text-gray-500">Create and manage staff accounts</p>
-        </div>
-
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          + Add Staff
-        </button>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold">Admin Settings</h1>
+        <p className="text-sm text-gray-500">Manage your account, store and system preferences</p>
       </div>
 
-      {/* Table */}
-      <div className="card bg-base-100 shadow">
-        <div className="card-body p-0">
-          <div className="overflow-x-auto">
-            <table className="table-zebra table">
-              <thead>
-                <tr>
-                  <th>Profile Image</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={4} className="py-6 text-center">
-                      Loading...
-                    </td>
-                  </tr>
-                ) : staff.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-6 text-center">
-                      No staff found
-                    </td>
-                  </tr>
-                ) : (
-                  staff.map((s) => (
-                    <tr className="group" key={s._id}>
-                      <td>
-                        {s.avatar ? (
-                          <img
-                            src={s.avatar}
-                            alt={s.name}
-                            className="size-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <User2 className="bg-base-300 size-8 rounded-full p-1 text-neutral-500 shadow-sm" />
-                        )}
-                      </td>
-                      <td>{s.name}</td>
-                      <td>{s.email}</td>
-                      <td>{s.phone || '-'}</td>
-                      <td>
-                        <span
-                          className={`badge rounded-full text-xs ${s.isActive ? 'badge-success' : 'badge-error'}`}
-                        >
-                          {s.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
+      {/* Theme Settings */}
+      <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
+        <div className="flex items-center gap-2">
+          <Shield size={18} />
+          <h2 className="font-medium">Appearance</h2>
+        </div>
+        <ThemeSelection />
+      </div>
 
-                      <td className="flex w-fit items-center justify-end gap-1 group-hover:cursor-pointer">
-                        <Button title="Edit staff" onClick={() => openEdit(s)}>
-                          <Edit2 size={17} />
-                        </Button>
-
-                        <Button
-                          title={s.isActive ? 'Deactivate' : 'Activate'}
-                          onClick={() => toggleStatus(s)}
-                        >
-                          {s.isActive ? <UserX size={17} /> : <UserCheck size={17} />}
-                        </Button>
-
-                        <Button title="Delete staff" onClick={() => deleteStaff(s._id)}>
-                          <Trash2 size={17} />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Profile Settings */}
+        <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
+          <div className="flex items-center gap-2">
+            <User size={18} />
+            <h2 className="font-medium">Profile Information</h2>
           </div>
-        </div>
-      </div>
+          <ProfilePhotoSelector
+            image={avatarPreview ?? form.avatar}
+            onChange={(image: ImageValue) => {
+              setAvatarPreview(image);
+            }}
+          />
 
-      {/* Modal */}
-      {showModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="mb-4 text-lg font-bold">Add Staff</h3>
-
-            {error && (
-              <div className="alert alert-error mb-4">
-                <span>{error}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleCreateStaff} className="space-y-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="flex flex-col">
+              Name
               <input
-                type="text"
+                className="input input-bordered mt-1.5 outline-none"
                 name="name"
-                placeholder="Full Name"
-                className="input input-bordered w-full"
                 value={form.name}
+                readOnly={!isEditing}
+                placeholder="Full Name"
                 onChange={handleChange}
-                required
-              />
-
+              />{' '}
+            </div>
+            <div className="flex flex-col">
+              Email
               <input
-                type="email"
+                className="input input-bordered mt-1.5"
                 name="email"
-                placeholder="Email"
-                className="input input-bordered w-full"
                 value={form.email}
-                onChange={handleChange}
-                required
+                placeholder="Email Address"
+                readOnly={!isEditing}
+                disabled
               />
-
+            </div>
+            <div className="flex flex-col">
+              Contact Number
               <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="input input-bordered w-full"
-                value={form.password}
-                onChange={handleChange}
-                required
-              />
-
-              <input
-                type="text"
+                className="input input-bordered mt-1.5 outline-none"
                 name="phone"
-                placeholder="Phone"
-                className="input input-bordered w-full"
                 value={form.phone}
+                placeholder="Phone Number"
+                readOnly={!isEditing}
                 onChange={handleChange}
               />
+            </div>
+            P
+          </div>
+        </div>
 
-              <div className="modal-action">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => {
-                    setShowModal(false);
-                    setError(null);
-                    setForm({ name: '', email: '', password: '', phone: '', avatar: '' });
-                  }}
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      Creating...
-                    </>
-                  ) : (
-                    'Create'
-                  )}
-                </button>
-              </div>
-            </form>
+        {/* Store Settings */}
+        <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
+          <div className="flex items-center gap-2">
+            <Store size={18} />
+            <h2 className="font-medium">Store Settings</h2>
           </div>
 
-          {/* backdrop */}
-          <div className="modal-backdrop" onClick={() => setShowModal(false)} />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="flex flex-col">
+              Store Name
+              <input
+                className="input input-bordered mt-1.5 outline-none"
+                name="storeName"
+                placeholder="Store Name"
+                readOnly={!isEditing}
+                value={form.storeName}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="flex flex-col">
+              Store Address
+              <input
+                className="input input-bordered mt-1.5 outline-none"
+                name="storeAddress"
+                placeholder="Store Address"
+                readOnly={!isEditing}
+                value={form.storeAddress}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="flex flex-col">
+              Store Currency
+              <select
+                className="select select-bordered mt-1.5 outline-none"
+                name="storeCurrency"
+                onChange={handleChange}
+                disabled={!isEditing}
+              >
+                <option value="NPR">NPR (Rs)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+              </select>
+            </div>
+            <div className="flex flex-col">
+              Timezone
+              <select
+                className="select select-bordered mt-1.5 outline-none"
+                name="timezone"
+                onChange={(e) => handleChange(e)}
+                disabled={!isEditing}
+              >
+                <option value="Asia/Kathmandu">Asia/Kathmandu</option>
+                <option value="Asia/Kolkata">Asia/Kolkata</option>
+                <option value="UTC">UTC</option>
+              </select>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Notification Settings */}
+      <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
+        <div className="flex items-center gap-2">
+          <Bell size={18} />
+          <h2 className="font-medium">Notifications</h2>
+        </div>
+
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            type="checkbox"
+            className="toggle toggle-primary"
+            name="isNotificationEnabled"
+            checked={form.isNotificationEnabled}
+            onChange={handleChange}
+          />
+          <span className="text-sm">Enable low stock alerts</span>
+        </label>
+      </div>
+
+      {/* Actions */}
+      <div className="mt-6 flex justify-between">
+        <Button title="Delete account" className="btn btn-error btn-outline" onClick={handleDelete}>
+          <Trash2 size={18} />
+          Delete Account
+        </Button>
+
+        {!isEditing ? (
+          <Button title="Edit" className="btn btn-primary px-3" onClick={() => setIsEditing(true)}>
+            <Pen size={18} />
+            <span>Edit</span>
+          </Button>
+        ) : (
+          <div className="flex items-center justify-center gap-4">
+            <Button
+              title="Cancel"
+              className="btn border-error border shadow-sm"
+              onClick={() => {
+                setIsEditing(false);
+                setAvatarPreview(null);
+                fetchUserSettingData();
+              }}
+            >
+              <X size={18} />
+              <span>Cancel</span>
+            </Button>
+            <Button title="Save" className="btn btn-success" onClick={handleUpdate}>
+              <Save size={18} />
+              <span>Save</span>
+            </Button>
+          </div>
+        )}
+      </div>
     </AdminLayout>
   );
 };
 
-const Button = ({
-  children,
-  title,
-  onClick,
-}: {
-  children: React.ReactNode;
-  title: string;
-  onClick?: () => Promise<void> | void;
-}) => {
-  return (
-    <button
-      className={
-        'hover:bg-neutral/60 btn btn-sm scale-90 rounded-full p-2 opacity-0 transition-opacity duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100'
-      }
-      title={title}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
+export default AdminSettings;
+
+import { LucideTrash, LucideUpload, LucideUser } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+
+export type ImageValue = string | File | null;
+
+type Props = {
+  image: ImageValue;
+  onChange: (image: ImageValue) => void;
 };
 
-export default ManageStaff; -->
+const ProfilePhotoSelector: React.FC<Props> = ({ image, onChange }) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-import React from 'react';
+  useEffect(() => {
+    if (!image) {
+      setPreviewUrl(null);
+      return;
+    }
 
-interface StaffForm {
-  name: string;
-  email: string;
-  password?: string;
-  phone?: string;
-  avatar?: string;
-}
+    if (typeof image === 'string') {
+      setPreviewUrl(image);
+      return;
+    }
 
-interface Props {
-  open: boolean;
-  title: string;
-  submitting: boolean;
-  error?: string | null;
-  form: StaffForm;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onClose: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  isEdit?: boolean;
-}
+    const preview = URL.createObjectURL(image);
+    setPreviewUrl(preview);
 
-const StaffFormModal: React.FC<Props> = ({
-  open,
-  title,
-  submitting,
-  error,
-  form,
-  onChange,
-  onClose,
-  onSubmit,
-  isEdit = false,
-}) => {
-  if (!open) return null;
+    return () => URL.revokeObjectURL(preview);
+  }, [image]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onChange(file);
+  };
+
+  const handleRemove = () => {
+    onChange(null);
+    if (inputRef.current) inputRef.current.value = '';
+  };
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box">
-        <h3 className="mb-4 text-lg font-bold">{title}</h3>
+    <div className="mb-6 flex justify-center">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        className="hidden"
+      />
 
-        {error && (
-          <div className="alert alert-error mb-4">
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={onSubmit} className="space-y-3">
-          <input
-            name="name"
-            placeholder="Full Name"
-            className="input input-bordered w-full"
-            value={form.name}
-            onChange={onChange}
-            required
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="input input-bordered w-full"
-            value={form.email}
-            onChange={onChange}
-            required
-          />
-
-          {!isEdit && (
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="input input-bordered w-full"
-              value={form.password || ''}
-              onChange={onChange}
-              required
-            />
-          )}
-
-          <input
-            name="phone"
-            placeholder="Phone"
-            className="input input-bordered w-full"
-            value={form.phone || ''}
-            onChange={onChange}
-          />
-
-          <div className="modal-action">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                isEdit ? 'Update' : 'Create'
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="modal-backdrop" onClick={onClose} />
+      {!previewUrl ? (
+        <div className="bg-base-300 relative flex size-20 items-center justify-center rounded-full">
+          <LucideUser className="text-base-content size-9" />
+          <button
+            type="button"
+            title="Upload profile photo"
+            className="bg-success absolute -right-1 -bottom-1 flex size-8 cursor-pointer items-center justify-center rounded-full text-white"
+            onClick={() => inputRef.current?.click()}
+          >
+            <LucideUpload size={18} />
+          </button>
+        </div>
+      ) : (
+        <div className="relative">
+          <img src={previewUrl} className="size-20 rounded-full object-cover" />
+          <button
+            type="button"
+            title="Remove profile photo"
+            className="bg-error absolute -right-1 -bottom-1 flex size-8 cursor-pointer items-center justify-center rounded-full text-white"
+            onClick={handleRemove}
+          >
+            <LucideTrash size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-export default StaffFormModal;
-    interface Props {
-    open: boolean;
-    title: string;
-    message: string;
-    confirmText?: string;
-    onConfirm: () => void;
-    onCancel: () => void;
+export default ProfilePhotoSelector;
+
+import { Request, Response } from "express";
+import { getUserModelByRole, uploadToCloudinary } from "../../utils/helper.js";
+
+interface AuthRequest extends Request {
+  user?: {
+    _id: string;
+    role: "admin" | "staff";
+    store?: string;
+  };
+}
+
+/**
+ * GET logged-in user details (Admin or Staff)
+ */
+export const getUserDetails = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const ConfirmModal: React.FC<Props> = ({
-    open,
-    title,
-    message,
-    confirmText = 'Yes',
-    onConfirm,
-    onCancel,
-    }) => {
-    if (!open) return null;
+    const UserModel = getUserModelByRole(req.user.role);
 
-    return (
-        <div className="modal modal-open">
-        <div className="modal-box">
-            <h3 className="text-lg font-bold">{title}</h3>
-            <p className="py-4">{message}</p>
+    if (!UserModel) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user role",
+      });
+    }
 
-            <div className="modal-action">
-            <button className="btn btn-ghost" onClick={onCancel}>
-                No
-            </button>
-            <button className="btn btn-error" onClick={onConfirm}>
-                {confirmText}
-            </button>
-            </div>
-        </div>
+    const user = await UserModel.findById(req.user._id).select("-password");
 
-        <div className="modal-backdrop" onClick={onCancel} />
-        </div>
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error("GET USER DETAILS ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch user details",
+    });
+  }
+};
+
+/**
+ * UPDATE logged-in user details
+ * (Profile + store-related fields for admin)
+ */
+export const updateUserDetails = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    const file = req.file;
+
+    const UserModel = getUserModelByRole(req.user.role);
+
+    if (!UserModel) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user role",
+      });
+    }
+
+    /**
+     * Whitelist fields (important for security)
+     */
+    const allowedFields =
+      req.user.role === "admin"
+        ? [
+            "name",
+            "phone",
+            "avatar",
+            "storeName",
+            "storeAddress",
+            "storeCurrency",
+            "timezone",
+            "lowStockAlert",
+            "isNotificationEnabled",
+          ]
+        : ["name", "phone", "avatar"];
+
+    let avatarUrl: string | undefined;
+    const updates: Record<string, any> = {};
+
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) {
+        updates[key] = req.body[key];
+      }
+    }
+
+    if (file) {
+      avatarUrl = await uploadToCloudinary(file);
+    }
+
+    if (avatarUrl) {
+      updates.avatar = avatarUrl;
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("UPDATE USER DETAILS ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update user details",
+    });
+  }
+};
+
+/**
+ * DELETE user account
+ * - Admin → deletes own account (store shutdown scenario)
+ * - Staff → usually deleted by admin (handled elsewhere)
+ */
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const UserModel = getUserModelByRole(req.user.role);
+
+    if (!UserModel) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user role",
+      });
+    }
+
+    const deletedUser = await UserModel.findByIdAndDelete(req.user._id);
+
+    if (!deletedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User account deleted successfully",
+    });
+  } catch (error) {
+    console.error("DELETE USER ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete user",
+    });
+  }
+};
+
+import express from "express";
+import {
+  deleteUser,
+  getUserDetails,
+  updateUserDetails,
+} from "../../controller/shared/setting.controller";
+import upload from "../../middlewares/multer";
+import { auth } from "../../middlewares/auth.middleware";
+
+const settingRoutes = express.Router();
+
+settingRoutes.get("/user",auth, getUserDetails);
+settingRoutes.put("/:id",auth, upload.single("avatar"), updateUserDetails);
+settingRoutes.delete("/:id",auth, deleteUser);
+
+export default settingRoutes;
+
+export const uploadToCloudinary = (
+  file: Express.Multer.File
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    // Validate file buffer exists
+    if (!file.buffer) {
+      return reject(
+        new Error("File buffer is missing. Ensure multer uses memoryStorage.")
+      );
+    }
+
+    // Validate Cloudinary is configured
+    if (
+      !process.env.CLOUDINARY_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_SECRET_KEY
+    ) {
+      return reject(
+        new Error("Cloudinary credentials are missing. Check your .env file.")
+      );
+    }
+
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "SISMS",
+        resource_type: "image",
+        transformation: [
+          { width: 800, height: 800, crop: "limit" },
+          { quality: "auto" },
+        ],
+      },
+      (err, result) => {
+        if (err) {
+          console.error("Cloudinary upload error details:", {
+            message: err.message,
+            http_code: err.http_code,
+            name: err.name,
+          });
+          return reject(new Error(`Cloudinary upload failed: ${err.message}`));
+        }
+        if (!result?.secure_url) {
+          return reject(new Error("No secure URL returned from Cloudinary"));
+        }
+        console.log("Image uploaded successfully:", result.secure_url);
+        resolve(result.secure_url);
+      }
     );
-    };
 
-    export default ConfirmModal;
+    try {
+      streamifier.createReadStream(file.buffer).pipe(stream);
+    } catch (pipeError: any) {
+      console.error("Error piping file to Cloudinary:", pipeError);
+      reject(new Error(`Failed to process image: ${pipeError.message}`));
+    }
+  });
+};

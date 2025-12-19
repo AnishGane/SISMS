@@ -83,13 +83,7 @@ const AuthForm = ({
           </div>
         )}
 
-        {/* <button
-          type="submit"
-          className="w-full py-2 btn-linear text-white cursor-pointer transition-colors"
-        >
-          {buttonText}
-        </button> */}
-        <Button text={buttonText} title="Submit" />
+        <Button className="btn-linear w-full text-white" text={buttonText} title={buttonText} />
       </form>
 
       {bottomLinks && <div className="mt-6 text-center text-sm text-gray-500">{bottomLinks}</div>}

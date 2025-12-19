@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getUserModelByRole } from "../../utils/helper.js";
+import { getUserModelByRole, uploadToCloudinary } from "../../utils/helper.js";
 
 interface AuthRequest extends Request {
   user?: {
@@ -58,6 +58,7 @@ export const updateUserDetails = async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
+    const file = req.file;
 
     const UserModel = getUserModelByRole(req.user.role);
 
@@ -68,9 +69,6 @@ export const updateUserDetails = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    /**
-     * Whitelist fields (important for security)
-     */
     const allowedFields =
       req.user.role === "admin"
         ? [
@@ -86,12 +84,25 @@ export const updateUserDetails = async (req: AuthRequest, res: Response) => {
           ]
         : ["name", "phone", "avatar"];
 
+    let avatarUrl: string | undefined;
     const updates: Record<string, any> = {};
 
     for (const key of allowedFields) {
       if (req.body[key] !== undefined) {
         updates[key] = req.body[key];
       }
+    }
+
+    if (req.body.avatar === "") {
+      updates.avatar = "";
+    }
+
+    if (file) {
+      avatarUrl = await uploadToCloudinary(file);
+    }
+
+    if (avatarUrl) {
+      updates.avatar = avatarUrl;
     }
 
     const updatedUser = await UserModel.findByIdAndUpdate(

@@ -8,13 +8,18 @@ import { useAdmin } from '../../context/AdminContext';
 import Button from '../../components/ui/Button';
 import ConfirmModal from '../../components/admin/ManageStaff/ConfirmModal';
 import toast from 'react-hot-toast';
+import ProfilePhotoSelector from '../../components/ui/ProfilePhotoSelector';
+import type { ImageValue } from '../../types/staff';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminSettings = () => {
+  const [avatarPreview, setAvatarPreview] = useState<ImageValue>(null);
   const [form, setForm] = useState({
     _id: '',
     name: '',
     email: '',
     phone: '',
+    avatar: '',
     storeName: '',
     storeAddress: '',
     storeCurrency: 'NPR',
@@ -23,6 +28,7 @@ const AdminSettings = () => {
   });
   const { loading, setLoading, confirmConfig, setConfirmConfig } = useAdmin();
   const [isEditing, setIsEditing] = useState(false);
+  const { updateUser } = useAuth();
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -35,6 +41,7 @@ const AdminSettings = () => {
       const res = await axiosInstance.get(API_PATHS.ADMIN.SETTING.GET_SETTING);
       setLoading(false);
       setForm(res.data.data);
+      console.log(res.data.data);
     } catch (err) {
       setLoading(false);
       console.log(err);
@@ -42,13 +49,32 @@ const AdminSettings = () => {
   };
 
   const handleUpdate = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axiosInstance.put(API_PATHS.ADMIN.SETTING.UPDATE_SETTING(form._id), form);
+      const fd = new FormData();
+
+      // append text fields (EXCEPT avatar)
+      Object.entries(form).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && key !== 'avatar') {
+          fd.append(key, String(value));
+        }
+      });
+
+      // append avatar ONLY if new file selected
+      if (avatarPreview instanceof File) {
+        fd.append('avatar', avatarPreview);
+      }
+
+      const res = await axiosInstance.put(API_PATHS.ADMIN.SETTING.UPDATE_SETTING(form._id), fd);
+
       setForm(res.data.data);
+      updateUser(res.data.data);
+      setAvatarPreview(null);
       setIsEditing(false);
+      toast.success('Profile updated successfully');
     } catch (err) {
       console.error(err);
+      toast.error('Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -70,10 +96,6 @@ const AdminSettings = () => {
   useEffect(() => {
     fetchUserSettingData();
   }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <AdminLayout>
@@ -98,156 +120,190 @@ const AdminSettings = () => {
         </div>
         <ThemeSelection />
       </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Profile Settings */}
-        <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
-          <div className="flex items-center gap-2">
-            <User size={18} />
-            <h2 className="font-medium">Profile Information</h2>
-          </div>
-
+      {loading ? (
+        <div className="card card-lg bg-base-200 mt-6 flex items-center justify-center py-20">
+          <p className="text-primary text-2xl">loading...</p>
+        </div>
+      ) : (
+        <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="flex flex-col">
-              Name
-              <input
-                className="input input-bordered mt-1.5 outline-none"
-                name="name"
-                value={form.name}
-                readOnly
-                placeholder="Full Name"
-                onChange={handleChange}
-              />{' '}
-            </div>
-            <div className="flex flex-col">
-              Email
-              <input
-                className="input input-bordered mt-1.5"
-                name="email"
-                value={form.email}
-                placeholder="Email Address"
-                readOnly={!isEditing}
-                disabled
+            {/* Profile Settings */}
+            <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
+              <div className="flex items-center gap-2">
+                <User size={18} />
+                <h2 className="font-medium">Profile Information</h2>
+              </div>
+              <ProfilePhotoSelector
+                isEditting={isEditing}
+                image={avatarPreview ?? form.avatar}
+                onChange={(image) => {
+                  setAvatarPreview(image instanceof File ? image : null);
+
+                  // handle remove
+                  if (image === null) {
+                    setForm((prev) => ({ ...prev, avatar: '' }));
+                  }
+                }}
               />
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="flex flex-col">
+                  Name
+                  <input
+                    className="input input-bordered mt-1.5 outline-none"
+                    name="name"
+                    value={form.name}
+                    readOnly={!isEditing}
+                    placeholder="Full Name"
+                    onChange={handleChange}
+                  />{' '}
+                </div>
+                <div className="flex flex-col">
+                  Email
+                  <input
+                    className="input input-bordered mt-1.5"
+                    name="email"
+                    value={form.email}
+                    placeholder="Email Address"
+                    readOnly={!isEditing}
+                    disabled
+                  />
+                </div>
+                <div className="flex flex-col">
+                  Contact Number
+                  <input
+                    className="input input-bordered mt-1.5 outline-none"
+                    name="phone"
+                    value={form.phone}
+                    placeholder="Phone Number"
+                    readOnly={!isEditing}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col">
-              Contact Number
-              <input
-                className="input input-bordered mt-1.5 outline-none"
-                name="phone"
-                value={form.phone}
-                placeholder="Phone Number"
-                readOnly={!isEditing}
-                onChange={handleChange}
-              />
+
+            {/* Store Settings */}
+            <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
+              <div className="flex items-center gap-2">
+                <Store size={18} />
+                <h2 className="font-medium">Store Settings</h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="flex flex-col">
+                  Store Name
+                  <input
+                    className="input input-bordered mt-1.5 outline-none"
+                    name="storeName"
+                    placeholder="Store Name"
+                    readOnly={!isEditing}
+                    value={form.storeName}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  Store Address
+                  <input
+                    className="input input-bordered mt-1.5 outline-none"
+                    name="storeAddress"
+                    placeholder="Store Address"
+                    readOnly={!isEditing}
+                    value={form.storeAddress}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  Store Currency
+                  <select
+                    className="select select-bordered mt-1.5 outline-none"
+                    name="storeCurrency"
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                  >
+                    <option value="NPR">NPR (Rs)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                  </select>
+                </div>
+                <div className="flex flex-col">
+                  Timezone
+                  <select
+                    className="select select-bordered mt-1.5 outline-none"
+                    name="timezone"
+                    onChange={(e) => handleChange(e)}
+                    disabled={!isEditing}
+                  >
+                    <option value="Asia/Kathmandu">Asia/Kathmandu</option>
+                    <option value="Asia/Kolkata">Asia/Kolkata</option>
+                    <option value="UTC">UTC</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Store Settings */}
-        <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
-          <div className="flex items-center gap-2">
-            <Store size={18} />
-            <h2 className="font-medium">Store Settings</h2>
-          </div>
+          {/* Notification Settings */}
+          <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
+            <div className="flex items-center gap-2">
+              <Bell size={18} />
+              <h2 className="font-medium">Notifications</h2>
+            </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="flex flex-col">
-              Store Name
+            <label className="flex cursor-pointer items-center gap-3">
               <input
-                className="input input-bordered mt-1.5 outline-none"
-                name="storeName"
-                placeholder="Store Name"
-                readOnly={!isEditing}
-                value={form.storeName}
+                type="checkbox"
+                className="toggle toggle-primary"
+                name="isNotificationEnabled"
+                checked={form.isNotificationEnabled}
                 onChange={handleChange}
               />
-            </div>
-            <div className="flex flex-col">
-              Store Address
-              <input
-                className="input input-bordered mt-1.5 outline-none"
-                name="storeAddress"
-                placeholder="Store Address"
-                readOnly={!isEditing}
-                value={form.storeAddress}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex flex-col">
-              Store Currency
-              <select
-                className="select select-bordered mt-1.5 outline-none"
-                name="storeCurrency"
-                onChange={handleChange}
-                disabled={!isEditing}
-              >
-                <option value="NPR">NPR (Rs)</option>
-                <option value="INR">INR (₹)</option>
-                <option value="USD">USD ($)</option>
-              </select>
-            </div>
-            <div className="flex flex-col">
-              Timezone
-              <select
-                className="select select-bordered mt-1.5 outline-none"
-                name="timezone"
-                onChange={(e) => handleChange(e)}
-                disabled={!isEditing}
-              >
-                <option value="Asia/Kathmandu">Asia/Kathmandu</option>
-                <option value="Asia/Kolkata">Asia/Kolkata</option>
-                <option value="UTC">UTC</option>
-              </select>
-            </div>
+              <span className="text-sm">Enable low stock alerts</span>
+            </label>
           </div>
-        </div>
-      </div>
 
-      {/* Notification Settings */}
-      <div className="card bg-base-200 mt-6 space-y-4 rounded-xl p-5">
-        <div className="flex items-center gap-2">
-          <Bell size={18} />
-          <h2 className="font-medium">Notifications</h2>
-        </div>
-
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            className="toggle toggle-primary"
-            name="isNotificationEnabled"
-            checked={form.isNotificationEnabled}
-            onChange={handleChange}
-          />
-          <span className="text-sm">Enable low stock alerts</span>
-        </label>
-      </div>
-
-      {/* Actions */}
-      <div className="mt-6 flex justify-between">
-        <Button title="Delete account" className="btn btn-error btn-outline" onClick={handleDelete}>
-          <Trash2 size={18} />
-          Delete Account
-        </Button>
-
-        {!isEditing ? (
-          <Button title="Edit" className="btn btn-primary px-3" onClick={() => setIsEditing(true)}>
-            <Pen size={18} />
-            <span>Edit</span>
-          </Button>
-        ) : (
-          <div className="flex items-center justify-center gap-4">
-            <Button title="Save" className="btn border-error border shadow-sm" onClick={handleUpdate}>
-              <X size={18} />
-              <span>Cancel</span>
+          {/* Actions */}
+          <div className="mt-6 flex justify-between">
+            <Button
+              title="Delete account"
+              className="btn btn-error btn-outline"
+              onClick={handleDelete}
+            >
+              <Trash2 size={18} />
+              Delete Account
             </Button>
-            <Button title="Save" className="btn btn-success" onClick={handleUpdate}>
-              <Save size={18} />
-              <span>Save</span>
-            </Button>
+
+            {!isEditing ? (
+              <Button
+                title="Edit"
+                className="btn btn-primary px-3"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pen size={18} />
+                <span>Edit</span>
+              </Button>
+            ) : (
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  title="Cancel"
+                  className="btn border-error border shadow-sm"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setAvatarPreview(null);
+                  }}
+                >
+                  <X size={18} />
+                  <span>Cancel</span>
+                </Button>
+                <Button title="Save" className="btn btn-success" onClick={handleUpdate}>
+                  <Save size={18} />
+                  <span>Save</span>
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </AdminLayout>
   );
 };

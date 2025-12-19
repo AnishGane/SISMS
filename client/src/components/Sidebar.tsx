@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({
   role = 'admin',
@@ -35,7 +36,7 @@ const Sidebar = ({
   ];
 
   const menu = role === 'admin' ? adminMenu : staffMenu;
-
+  const { clearUser } = useAuth();
   return (
     <div
       className={`bg-base-200 text-base-content fixed top-0 left-0 h-screen shadow-lg transition-all duration-300 ${
@@ -72,7 +73,7 @@ const Sidebar = ({
         <button
           className={`bg-error mx-2 my-6 flex w-[calc(100%-1rem)] cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-white transition hover:brightness-110`}
           onClick={() => {
-            localStorage.clear();
+            clearUser();
             window.location.href = role === 'admin' ? '/auth/admin/login' : '/auth/staff/login';
           }}
         >

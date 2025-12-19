@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 
 type ButtonProps = {
   icon?: JSX.Element;
-  text?: string;
+  text: string;
   onClick?: () => Promise<void> | void;
   className?: string;
   title: string;
