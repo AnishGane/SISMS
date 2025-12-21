@@ -24,6 +24,7 @@ export default function MonthlySalesChart() {
     try {
       const res = await axiosInstance(API_PATHS.ADMIN.DASHBOARD.GET_MONTHLY_SALES_CHART);
       setChartData(res.data.data);
+      console.log(res.data.data);
     } catch (error) {
       console.error('Failed to load monthly sales:', error);
     } finally {
@@ -40,7 +41,7 @@ export default function MonthlySalesChart() {
   }
 
   return (
-    <div className="h-[320px] w-full rounded-xl border bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="bg-base-200/50 ring-base-300 mt-10 h-[320px] w-full rounded-xl p-4 shadow-md ring-1">
       <h2 className="mb-4 text-sm font-semibold text-neutral-800 dark:text-neutral-100">
         Monthly Sales Overview
       </h2>

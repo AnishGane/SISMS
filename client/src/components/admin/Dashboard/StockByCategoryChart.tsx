@@ -12,25 +12,31 @@ export default function StockByCategoryChart() {
 
   return (
     <div className="bg-base-200/50 mt-10 space-y-4 rounded-xl p-6 shadow-md">
-      <Heading text1="Summary" text2="Get a quick overview" />
+      <Heading text1="Stock By Category" text2="Get a quick overview of the stocks by category" />
 
-      <div className="h-96">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            layout="vertical"
-            data={stockCategoryData}
-            margin={{ top: 10, right: 30, left: 40, bottom: 10 }}
-          >
-            <XAxis type="number" />
-            <YAxis dataKey="category" type="category" width={65} />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-            <Bar dataKey="stock" radius={[0, 8, 8, 0]}>
-              {stockCategoryData.map((_, index) => (
-                <Cell key={index} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="relative h-96">
+        {stockCategoryData.length === 0 ? (
+          <p className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-xl font-light text-gray-400">
+            Add products to see this chart
+          </p>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              layout="horizontal"
+              data={stockCategoryData}
+              margin={{ top: 10, right: 30, left: 40, bottom: 10 }}
+            >
+              <XAxis dataKey="category" type="category" width={65} />
+              <YAxis type="number" />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+              <Bar dataKey="stock" radius={[8, 8, 0, 0]}>
+                {stockCategoryData.map((_, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

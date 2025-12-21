@@ -127,7 +127,7 @@ const AdminProducts = () => {
         sort={sort}
       />
 
-      {loading ? (
+      {loading && products.length > 0 ? (
         <div
           className={
             layout === 'grid'
@@ -139,7 +139,9 @@ const AdminProducts = () => {
             <ProductCardSkeleton key={i} layout={layout} />
           ))}
         </div>
-      ) : products.length === 0 ? null : (
+      ) : products.length === 0 ? (
+        <p className="absolute font-light top-1/2 left-1/2 text-xl text-gray-500 tracking-wide">Add products to see here</p>
+      ) : (
         <div
           className={
             layout === 'grid'

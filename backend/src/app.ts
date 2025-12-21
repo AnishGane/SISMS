@@ -13,13 +13,13 @@ import authRoutes from "./routes/shared/auth.route.js";
 import productRoutes from "./routes/shared/products.route.js";
 // import orderRoutes from "./routes/shared/orders.routes.js";
 // import searchRoutes from "./routes/shared/search.routes.js";
-// import notificationRoutes from "./routes/shared/notifications.routes.js";
 
 // admin routes
 // import adminRoutes from "./routes/admin/admin.routes.js";
 import staffRoutes from "./routes/admin/staff.route.js";
 import dashboardRoute from "./routes/admin/dashboard.route.js";
 import settingRoutes from "./routes/shared/setting.route.js";
+import notificationRoutes from "./routes/shared/notifications.route.js";
 // import suppliersRoutes from "./routes/admin/suppliers.routes.js";
 // import purchasesRoutes from "./routes/admin/purchases.routes.js";
 // import analyticsRoutes from "./routes/admin/analytics.routes.js";
@@ -41,9 +41,10 @@ app.use("/api/admin/dashboard", dashboardRoute);
 // shared
 app.use("/api/products", productRoutes);
 app.use("/api/settings", settingRoutes);
+// console.log("Notification route registered");
+app.use("/api/notifications", notificationRoutes);
 // app.use("/api/orders", orderRoutes);
 // app.use("/api/search", searchRoutes);
-// app.use("/api/notifications", notificationRoutes);
 
 // admin
 // app.use("/api/admin", adminRoutes); // /profile, /store, /settings
@@ -58,5 +59,9 @@ app.use("/api/admin/staff", staffRoutes);
 
 // global error handling (always last)
 // app.use(errorHandler);
+
+app.get("/api/health", (_, res) => {
+  res.send("OK");
+});
 
 export default app;

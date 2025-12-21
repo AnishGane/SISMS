@@ -4,6 +4,7 @@ import StockByCategoryChart from '../../components/admin/Dashboard/StockByCatego
 import AdminLayout from '../../layouts/AdminLayout';
 import MonthlySalesChart from '../../components/admin/Dashboard/MonthlySalesChart';
 import { useAdmin } from '../../context/AdminContext';
+import TodaysOverview from '../../components/admin/Dashboard/TodaysOverview';
 
 const AdminDashboard = () => {
   const { avatarUrl } = useAdmin();
@@ -19,7 +20,9 @@ const AdminDashboard = () => {
 
       <StockByCategoryChart />
 
-      <MonthlySalesChart />
+      {/* <MonthlySalesChart /> */}
+
+      {/* <TodaysOverview /> */}
     </AdminLayout>
   );
 };

@@ -115,36 +115,6 @@ export const getMonthlySalesChart = async (req: Request, res: Response) => {
   }
 };
 
-export const getLowStockNotifications = async (req: Request, res: Response) => {
-  try {
-    const storeId = req.user.store || req.user._id;
-
-    const products = await ProductModel.find({ store: storeId });
-
-    const result = products.map((p) => {
-      const avgSales = p.avgDailySales || 1;
-      const lead = p.leadTimeDays || 3;
-
-      const safetyStock = avgSales * lead * 0.5;
-      const dynamicReorderLevel = avgSales * lead + safetyStock;
-
-      const isLow = p.stock <= (p.reorderLevel || dynamicReorderLevel);
-
-      return {
-        product: p.name,
-        category: p.category,
-        stock: p.stock,
-        reorderLevel: p.reorderLevel || dynamicReorderLevel,
-        status: isLow ? "Low Stock" : "OK",
-      };
-    });
-
-    res.json({ success: true, data: result });
-  } catch (err) {
-    res.status(500).json({ success: false, err });
-  }
-};
-
 export const getRecentActivity = async (req: Request, res: Response) => {
   try {
     const storeId = req.user.store || req.user._id;
@@ -176,5 +146,63 @@ export const getRecentActivity = async (req: Request, res: Response) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, err });
+  }
+};
+
+export const getTodaysOverview = async (req: Request, res: Response) => {
+  try {
+    const storeId = req.user?.store;
+    if (!storeId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const result = await OrderModel.aggregate([
+      {
+        $match: {
+          store: storeId,
+          createdAt: { $gte: start, $lte: end },
+          status: "completed",
+        },
+      },
+      {
+        $unwind: "$items",
+      },
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: "$total" },
+          totalOrders: { $addToSet: "$_id" },
+          totalItemsSold: { $sum: "$items.qty" },
+          staffSet: { $addToSet: "$createdBy" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalSales: 1,
+          ordersCount: { $size: "$totalOrders" },
+          itemsSold: "$totalItemsSold",
+          activeStaff: { $size: "$staffSet" },
+        },
+      },
+    ]);
+
+    res.json({
+      success: true,
+      data: result[0] || {
+        totalSales: 0,
+        ordersCount: 0,
+        itemsSold: 0,
+        activeStaff: 0,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

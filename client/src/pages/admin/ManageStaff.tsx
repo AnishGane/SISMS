@@ -198,10 +198,10 @@ const ManageStaff = () => {
       {/* Table */}
       <div className="card bg-base-100 shadow">
         <div className="card-body p-0">
-          <div className="overflow-x-auto">
-            <table className="table-zebra border-neutral table overflow-hidden rounded-md border">
+          <div className="overflow-x-auto rounded-md">
+            <table className="table-zebra border-neutral-content table overflow-hidden rounded border">
               <thead>
-                <tr className="text-neutral-content bg-base-300">
+                <tr className="bg-base-300">
                   <th>Profile Image</th>
                   <th>Name</th>
                   <th>Email</th>
@@ -219,7 +219,7 @@ const ManageStaff = () => {
                   </tr>
                 ) : staff.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-6 text-center">
+                    <td colSpan={4} className="py-8 text-center">
                       No staff found
                     </td>
                   </tr>

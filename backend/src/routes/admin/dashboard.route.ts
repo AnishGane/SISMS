@@ -5,8 +5,9 @@ import {
   getAdminDashboardData,
   getStockByCategory,
   getMonthlySalesChart,
-  getLowStockNotifications,
+  // getLowStockNotifications,
   getRecentActivity,
+  getTodaysOverview,
 } from "../../controller/admin/dashboard.controller.js";
 import { allowRoles } from "../../middlewares/role.middleware.js";
 
@@ -32,13 +33,19 @@ dashboardRoute.get(
 );
 
 // ✔ Low Stock Alerts (AI reorder algorithm)
+// dashboardRoute.get(
+//   "/low-stock",
+//   auth,
+//   allowRoles("admin"),
+//   getLowStockNotifications
+// );
+
 dashboardRoute.get(
-  "/low-stock",
+  "/todaysOverview",
   auth,
   allowRoles("admin"),
-  getLowStockNotifications
+  getTodaysOverview
 );
-
 // ✔ Recent Activities (products, stocks, sales, staff)
 dashboardRoute.get(
   "/recent-activity",

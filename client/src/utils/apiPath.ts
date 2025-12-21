@@ -14,8 +14,9 @@ export const API_PATHS = {
       GET_CARDS_DATA: '/api/admin/dashboard/cards',
       GET_STOCK_BY_CATEGORY: '/api/admin/dashboard/stock-by-category',
       GET_MONTHLY_SALES_CHART: '/api/admin/dashboard/monthly-sales',
-      GET_LOW_STOCK_ALERTS: '/api/admin/dashboard/low-stock',
+      // GET_LOW_STOCK_ALERTS: '/api/admin/dashboard/low-stock',
       GET_RECENT_ACTIVITY: '/api/admin/dashboard/recent-activity',
+      GET_TODAYS_OVERVIEW: '/api/admin/dashboard/todaysOverview',
     },
     STAFF: {
       GET_STAFFS: '/api/admin/staff',
@@ -49,6 +50,14 @@ export const API_PATHS = {
       },
       DELETE_SETTING(id: string) {
         return `/api/settings/${id}`;
+      },
+    },
+    NOTIFICATION: {
+      GET_ALL_NOTIFICATIONS: '/api/notifications',
+      MARK_ALL_READ: '/api/notifications/markAllRead',
+      UNREAD_COUNT: '/api/notifications/unread/count',
+      MARK_AS_READ(id: string) {
+        return `/api/notifications/${id}/read`;
       },
     },
   },

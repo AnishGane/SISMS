@@ -12,7 +12,7 @@ type ButtonProps = {
 };
 const Button = ({ icon, text, title, children, disabled, onClick, className }: ButtonProps) => {
   const base =
-    ' p-2 cursor-pointer font-medium flex gap-2 items-center justify-center tracking-wide rounded-md';
+    ' p-2 cursor-pointer font-medium flex gap-2 items-center justify-center tracking-wide rounded-md border-none';
   return (
     <motion.button
       whileHover={{ scale: 1.035 }}

@@ -1,4 +1,5 @@
 import { getInitials } from '../utils/getInitials';
+import NotificationBell from './admin/NotificationBell';
 
 type WelcomeHeaderProps = {
   text: string;
@@ -16,6 +17,7 @@ const WelcomeHeader = ({ text, subText, avatarUrl }: WelcomeHeaderProps) => {
       </div>
 
       <div className="flex items-center justify-center gap-3">
+        <NotificationBell />
         <div className="flex flex-col">
           <p className="text-right font-medium">Welcome, {username}</p>
           <p className="text-secondary text-sm">Hope you are having a good day!</p>
