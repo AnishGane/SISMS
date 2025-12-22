@@ -11,12 +11,12 @@ import Title from '../../components/Title';
 
 const LandingPage: React.FC = () => {
   return (
-    <main className="mx-auto w-full max-w-380 py-4">
+    <main className="">
       <Title title="Smart Inventory & Sales Management System" />
       {/* Navbar */}
       <LandingNav />
 
-      <section className="mt-20 text-center">
+      <section className="mx-auto mt-20 w-full max-w-380 py-4 text-center md:px-14">
         {/* Badge */}
         <Badge />
 

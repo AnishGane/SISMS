@@ -20,13 +20,24 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const fetchAll = async () => {
     setLoading(true);
-    const res = await axiosInstance.get(API_PATHS.ADMIN.NOTIFICATION.GET_ALL_NOTIFICATIONS);
+    try {
+      const res = await axiosInstance.get(API_PATHS.ADMIN.NOTIFICATION.GET_ALL_NOTIFICATIONS);
 
-    setNotifications(res.data.notifications ?? []);
-    setLoading(false);
+      setNotificationsEnabled(true);
+      setNotifications(res.data.notifications ?? []);
+    } catch (err: any) {
+      // backend returns 403 / 400 status when disabled
+      if (err?.response?.status === 403) {
+        setNotificationsEnabled(false);
+        setNotifications([]);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchUnreadCount = async () => {
@@ -57,5 +68,6 @@ export function useNotifications() {
     fetchAll,
     markRead,
     markAllRead,
+    notificationsEnabled,
   };
 }

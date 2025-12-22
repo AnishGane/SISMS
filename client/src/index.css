@@ -9,11 +9,6 @@
   scroll-behavior: smooth;
 }
 
-:root {
-  --color-txt-primary: #1e2939;
-  --color-txt-secondary: #737373;
-}
-
 @layer utilities {
   #triangle-topleft {
     position: absolute;
@@ -67,12 +62,8 @@
     @apply cursor-not-allowed opacity-50;
   }
 
-  .text-primary {
-    color: var(--color-txt-primary);
-  }
-
-  .text-secondary {
-    color: var(--color-txt-secondary);
+  .landing-page-text-gradient {
+    @apply bg-linear-to-r from-indigo-500 to-pink-500 bg-clip-text  text-transparent;
   }
 
   .no_arrow {

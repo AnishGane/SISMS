@@ -15,7 +15,7 @@ const Button = ({ icon, text, title, children, disabled, onClick, className }: B
     ' p-2 cursor-pointer font-medium flex gap-2 items-center justify-center tracking-wide rounded-md border-none';
   return (
     <motion.button
-      whileHover={{ scale: 1.035 }}
+      whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 300, damping: 15 }}
       onClick={onClick}

@@ -1,6 +1,8 @@
+import Button from '../ui/Button';
+
 const Banner = () => {
   return (
-    <section className="w-full space-y-6 rounded-lg bg-gray-100/60 py-12">
+    <section className="bg-base-200 w-full space-y-6 rounded-lg py-12">
       <div className="avatars mx-auto flex w-fit">
         <img
           src="/images/av_1.avif"
@@ -24,9 +26,11 @@ const Banner = () => {
           Can't find the answer you're looking for? Please chat to our friendly team.
         </p>
       </div>
-      <button className="btn text-base-100 btn-lg rounded-md bg-[#7F56D9] text-lg font-medium">
-        Get in touch
-      </button>
+      <Button
+        text="Get in Touch"
+        title="Get in Touch"
+        className="btn text-white px-3.5 btn-lg rounded-md bg-[#7F56D9] text-lg font-medium mx-auto"
+      />
     </section>
   );
 };

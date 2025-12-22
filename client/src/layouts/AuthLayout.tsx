@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 interface AuthLayoutProps {
   children?: ReactNode;
@@ -20,15 +21,25 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
         />
         <div className="z-30 container mx-auto mt-6 flex h-auto flex-col justify-between overflow-y-auto px-4 py-2 sm:px-10">
           {/* Optional small logo/banner */}
-          <div className="mb-8 w-16">
-            <img
-              src="/images/Logo.jpeg"
-              alt="Auth Logo"
-              loading="lazy"
-              title="Smart Inventory & Sales Management System"
-              className="h-full w-full object-contain"
-            />
-          </div>
+          <Link
+            to={'/'}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: 'smooth',
+              })
+            }
+          >
+            <div className="mb-8 w-16">
+              <img
+                src="/images/Logo.jpeg"
+                alt="Auth Logo"
+                loading="lazy"
+                title="Smart Inventory & Sales Management System"
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </Link>
 
           <div className="m-auto w-full max-w-lg">{children}</div>
         </div>

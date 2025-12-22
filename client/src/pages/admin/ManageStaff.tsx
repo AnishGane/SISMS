@@ -189,7 +189,7 @@ const ManageStaff = () => {
         <Button
           title="Add Staff"
           icon={<UserPlus size={17} />}
-          className="btn bg-primary rounded-md p-3 font-medium"
+          className="btn bg-primary text-base-300 rounded-md p-3 font-medium"
           text="Add Staff"
           onClick={openAdd}
         />
@@ -199,7 +199,7 @@ const ManageStaff = () => {
       <div className="card bg-base-100 shadow">
         <div className="card-body p-0">
           <div className="overflow-x-auto rounded-md">
-            <table className="table-zebra border-neutral-content table overflow-hidden rounded border">
+            <table className="table-zebra table overflow-hidden rounded-lg border border-gray-300">
               <thead>
                 <tr className="bg-base-300">
                   <th>Profile Image</th>
@@ -292,7 +292,7 @@ const ActionBtn = ({
   return (
     <button
       className={
-        'hover:bg-neutral/60 btn btn-sm scale-90 rounded-full p-2 opacity-0 transition-opacity duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100'
+        'hover:bg-white btn btn-sm scale-90 rounded-full p-2 opacity-0 transition-opacity duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100'
       }
       title={title}
       onClick={onClick}

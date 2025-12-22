@@ -257,6 +257,7 @@ const AdminSettings = () => {
                 name="isNotificationEnabled"
                 checked={form.isNotificationEnabled}
                 onChange={handleChange}
+                disabled={!isEditing}
               />
               <span className="text-sm">Enable low stock alerts</span>
             </label>
@@ -265,40 +266,41 @@ const AdminSettings = () => {
           {/* Actions */}
           <div className="mt-6 flex justify-between">
             <Button
+              icon={<Trash2 size={18} />}
+              text="Delete Account"
               title="Delete account"
-              className="btn btn-error btn-outline"
+              className="btn btn-error btn-outline text-base-100 bg-red-400"
               onClick={handleDelete}
-            >
-              <Trash2 size={18} />
-              Delete Account
-            </Button>
+            />
 
             {!isEditing ? (
               <Button
+                icon={<Pen size={18} />}
+                text="Edit"
                 title="Edit"
                 className="btn btn-primary px-3"
                 onClick={() => setIsEditing(true)}
-              >
-                <Pen size={18} />
-                <span>Edit</span>
-              </Button>
+              />
             ) : (
               <div className="flex items-center justify-center gap-4">
                 <Button
+                  icon={<X size={18} />}
+                  text="Cancel"
                   title="Cancel"
                   className="btn border-error border shadow-sm"
                   onClick={() => {
                     setIsEditing(false);
                     setAvatarPreview(null);
                   }}
-                >
-                  <X size={18} />
-                  <span>Cancel</span>
-                </Button>
-                <Button title="Save" className="btn btn-success" onClick={handleUpdate}>
-                  <Save size={18} />
-                  <span>Save</span>
-                </Button>
+                />
+
+                <Button
+                  text="Save"
+                  icon={<Save size={18} />}
+                  title="Save"
+                  className="btn btn-success"
+                  onClick={handleUpdate}
+                />
               </div>
             )}
           </div>

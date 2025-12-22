@@ -4,7 +4,15 @@ import { useNotifications } from '../../hooks/useNotifications';
 import NotificationDropdown from './NotificationDropdown';
 
 const NotificationBell = () => {
-  const { unreadCount, fetchAll, loading, markRead, markAllRead, notifications } = useNotifications();
+  const {
+    unreadCount,
+    fetchAll,
+    loading,
+    notificationsEnabled,
+    markRead,
+    markAllRead,
+    notifications,
+  } = useNotifications();
   const [open, setOpen] = useState(false);
 
   const toggle = async () => {
@@ -13,7 +21,7 @@ const NotificationBell = () => {
   };
 
   useEffect(() => {
-    fetchAll(); // ✅ FETCH DATA
+    fetchAll();
   }, []);
 
   return (
@@ -27,7 +35,15 @@ const NotificationBell = () => {
         )}
       </button>
 
-      {open && <NotificationDropdown loading={loading} notifications={notifications} markRead={markRead} markAllRead={markAllRead}  />}
+      {open && (
+        <NotificationDropdown
+          loading={loading}
+          notifications={notifications}
+          markRead={markRead}
+          markAllRead={markAllRead}
+          notificationsEnabled={notificationsEnabled}
+        />
+      )}
     </div>
   );
 };

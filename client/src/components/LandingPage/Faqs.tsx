@@ -60,12 +60,12 @@ const Faqs = () => {
                 aria-controls={`faq-content-${index}`}
                 id={`faq-header-${index}`}
               >
-                <h3 className="font-medium text-gray-900 md:text-[17px]">{faq.q}</h3>
+                <h3 className="font-medium md:text-[17px]">{faq.q}</h3>
                 <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
                   {!isOpen ? (
-                    <CirclePlus className="cursor-pointer text-purple-500" aria-hidden="true" />
+                    <CirclePlus className="cursor-pointer " aria-hidden="true" />
                   ) : (
-                    <CircleMinus className="cursor-pointer text-purple-500" aria-hidden="true" />
+                    <CircleMinus className="cursor-pointer " aria-hidden="true" />
                   )}
                 </motion.div>
               </button>
@@ -77,13 +77,13 @@ const Faqs = () => {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: 'easeInOut' }}
+                    transition={{ duration: 0.35, ease: 'easeInOut' }}
                     className="overflow-hidden"
                     id={`faq-content-${index}`}
                     role="region"
                     aria-labelledby={`faq-header-${index}`}
                   >
-                    <p className="pr-12 pb-5 pl-4 text-left text-[13px] leading-relaxed text-gray-600 md:text-[17px]">
+                    <p className="pr-12 pb-5 pl-4 text-left text-[13px] leading-relaxed text-gray-400 md:text-[17px]">
                       {faq.a}
                     </p>
                   </motion.div>

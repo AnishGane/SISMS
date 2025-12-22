@@ -32,6 +32,16 @@ const VideoModal = ({
     if (e.target === e.currentTarget) closeModal();
   };
 
+  const handlePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.controls = true;
+      video.play();
+    }
+  };
+
   return (
     <>
       {/* MODAL */}
@@ -41,11 +51,11 @@ const VideoModal = ({
           className="animate-fadeIn fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm"
         >
           <div className="animate-scaleIn relative w-full max-w-3xl transform rounded-xl bg-white/50 p-2">
-            <p className="mt-1.5 mb-4 text-left text-2xl font-medium text-black">Demo Video</p>
+            <p className="mt-1.5 mb-3 text-left tracking-wide text-black">Watch a Demo video of our product</p>
             {/* CLOSE BUTTON */}
             <button
               onClick={closeModal}
-              className="absolute -top-4 -right-4 rounded-full bg-white p-2 text-black shadow transition hover:bg-neutral-200"
+              className="absolute -top-4 -right-4 rounded-full cursor-pointer bg-white p-2 text-black shadow transition hover:bg-neutral-200"
             >
               <X size={20} />
             </button>
@@ -55,7 +65,8 @@ const VideoModal = ({
               ref={videoRef}
               src={demoVideo}
               poster={VideoPoster}
-              controls
+              preload="metadata"
+              onClick={handlePlay}
               className="max-h-[110vh] w-full rounded-lg"
             />
           </div>

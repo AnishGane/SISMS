@@ -6,6 +6,8 @@
       const saved = localStorage.getItem("theme");
       if (saved) {
         document.documentElement.setAttribute("data-theme", saved);
+      }else{
+        localStorage.setItem("theme", "light");
       }
     </script>
     <meta charset="UTF-8" />

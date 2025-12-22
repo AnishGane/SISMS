@@ -20,7 +20,7 @@ const AdminDashboard = () => {
 
       <StockByCategoryChart />
 
-      {/* <MonthlySalesChart /> */}
+      <MonthlySalesChart />
 
       {/* <TodaysOverview /> */}
     </AdminLayout>

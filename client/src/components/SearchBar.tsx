@@ -54,35 +54,33 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            title="Grid Layout"
-            onClick={() => onLayoutChange('grid')}
-            className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
-              layout === 'grid'
-                ? 'bg-[#FF7477] text-white'
-                : 'ring ring-neutral-400 hover:bg-black/5'
-            }`}
-          >
-            <Grid />
-          </motion.button>
+          <div className="flex items-center gap-1.5 py-1 px-1.5 rounded-md ring-1 ring-neutral-500/50">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+              title="Grid Layout"
+              onClick={() => onLayoutChange('grid')}
+              className={`cursor-pointer rounded-md transition-colors duration-200 ${
+                layout === 'grid' ? 'bg-[#FF7477] text-white' : ''
+              }`}
+            >
+              <Grid />
+            </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            title="Table Layout"
-            onClick={() => onLayoutChange('table')}
-            className={`cursor-pointer rounded-md p-1 transition-colors duration-200 ${
-              layout === 'table'
-                ? 'bg-[#FF7477] text-white'
-                : 'ring ring-neutral-400 hover:bg-black/5'
-            }`}
-          >
-            <Table2 />
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+              title="Table Layout"
+              onClick={() => onLayoutChange('table')}
+              className={`cursor-pointer rounded-md transition-colors duration-200 ${
+                layout === 'table' ? 'bg-[#FF7477] text-white' : ''
+              }`}
+            >
+              <Table2 />
+            </motion.button>
+          </div>
 
           <select
             value={category}

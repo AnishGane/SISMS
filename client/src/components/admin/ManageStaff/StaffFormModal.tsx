@@ -55,7 +55,7 @@ const StaffFormModal: React.FC<Props> = ({
           <input
             name="name"
             placeholder="Full Name"
-            className="input input-bordered w-full rounded-md outline-none"
+            className="input input-bordered border-neutral/30 w-full rounded-md border outline-none focus:border-none focus:ring-1 focus:ring-neutral-500"
             value={form.name}
             onChange={onChange}
             required
@@ -65,7 +65,7 @@ const StaffFormModal: React.FC<Props> = ({
             type="email"
             name="email"
             placeholder="Email"
-            className="input input-bordered w-full rounded-md outline-none"
+            className="input input-bordered border-neutral/30 w-full rounded-md border outline-none focus:border-none focus:ring-1 focus:ring-neutral-500"
             value={form.email}
             onChange={onChange}
             required
@@ -76,7 +76,7 @@ const StaffFormModal: React.FC<Props> = ({
               type="password"
               name="password"
               placeholder="Password"
-              className="input input-bordered w-full rounded-md outline-none"
+              className="input input-bordered border-neutral/30 w-full rounded-md border outline-none focus:border-none focus:ring-1 focus:ring-neutral-500"
               value={form.password || ''}
               onChange={onChange}
               required
@@ -86,7 +86,7 @@ const StaffFormModal: React.FC<Props> = ({
           <input
             name="phone"
             placeholder="Phone"
-            className="input input-bordered w-full rounded-md outline-none"
+            className="input input-bordered border-neutral/30 w-full rounded-md border outline-none focus:border-none focus:ring-1 focus:ring-neutral-500"
             value={form.phone || ''}
             onChange={onChange}
           />
@@ -95,11 +95,16 @@ const StaffFormModal: React.FC<Props> = ({
             <Button
               title="Cancel"
               text="Cancel"
-              className="btn btn-ghost font-normal"
+              className="btn btn-ghost px-4 font-normal"
               onClick={onClose}
             />
 
-            <Button title="Submit" className="btn btn-success font-medium" disabled={submitting}>
+            <Button
+              text=""
+              title="Submit"
+              className="btn btn-success px-4 font-medium"
+              disabled={submitting}
+            >
               {submitting ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : isEdit ? (
