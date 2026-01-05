@@ -49,8 +49,8 @@ dashboardRoute.get(
 // ✔ Recent Activities (products, stocks, sales, staff)
 dashboardRoute.get(
   "/recent-activity",
-  allowRoles("admin"),
   auth,
+  allowRoles("admin"),
   getRecentActivity
 );
 

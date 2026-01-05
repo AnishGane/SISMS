@@ -25,7 +25,7 @@ const SummaryCards = () => {
           text=""
           title="Refresh"
           icon={<RefreshCcw size={17} />}
-          className="bg-neutral-500/10 rounded-full"
+          className="rounded-full bg-neutral-500/10"
           onClick={fetchDashboardData}
         />
       </div>

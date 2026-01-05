@@ -26,10 +26,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       setError(null);
       const response = await axiosInstance.get(API_PATHS.ADMIN.DASHBOARD.GET_CARDS_DATA);
-      //   console.log('Dashboard Data:', response);
       setDashboardData(response.data.data);
     } catch (err: any) {
-      //   console.error('Fetch Error:', err);
       setError(err?.response?.data?.message || 'Failed to fetch dashboard data');
     } finally {
       setLoading(false);

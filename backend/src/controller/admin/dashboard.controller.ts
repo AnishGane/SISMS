@@ -14,7 +14,7 @@ export const getAdminDashboardData = async (req: Request, res: Response) => {
 
     const lowStockCount = await ProductModel.countDocuments({
       store: storeId,
-      stock: { $lte: 5 },
+      stock: { $lte: 10 },
     });
 
     // Monthly Sales
