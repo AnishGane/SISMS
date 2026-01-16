@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPath';
-import { Edit2, Trash2, User2, UserCheck, UserPlus, UserX } from 'lucide-react';
+import { Edit2, Plus, Trash2, User2, UserCheck, UserPlus, UserX } from 'lucide-react';
 import StaffFormModal from '../../components/admin/ManageStaff/StaffFormModal';
 import ConfirmModal from '../../components/admin/ManageStaff/ConfirmModal';
 import Button from '../../components/ui/Button';
@@ -188,8 +188,8 @@ const ManageStaff = () => {
 
         <Button
           title="Add Staff"
-          icon={<UserPlus size={17} />}
-          className="btn bg-primary text-base-300 rounded-md p-3 font-medium"
+          icon={<Plus size={17} />}
+          className="btn bg-primary rounded-md p-3 font-medium text-white"
           text="Add Staff"
           onClick={openAdd}
         />
@@ -199,7 +199,7 @@ const ManageStaff = () => {
       <div className="card bg-base-100 shadow">
         <div className="card-body p-0">
           <div className="overflow-x-auto rounded-md">
-            <table className="table-zebra table overflow-hidden rounded-lg border border-gray-300">
+            <table className="table-zebra border-base-300 table overflow-hidden rounded-lg border">
               <thead>
                 <tr className="bg-base-300">
                   <th>Profile Image</th>
@@ -292,7 +292,7 @@ const ActionBtn = ({
   return (
     <button
       className={
-        'hover:bg-white btn btn-sm scale-90 rounded-full p-2 opacity-0 transition-opacity duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100'
+        'btn btn-sm scale-90 rounded-full p-2 opacity-0 transition-opacity duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100 hover:bg-white'
       }
       title={title}
       onClick={onClick}

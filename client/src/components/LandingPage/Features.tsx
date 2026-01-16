@@ -4,31 +4,31 @@ import type { JSX } from 'react';
 
 const features = [
   {
-    icon: <MessageCircleMore className="size-10 text-purple-600" />,
+    icon: <MessageCircleMore className="size-10 text-[#0082CE]" />,
     title: 'Smart Analytics',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
   },
   {
-    icon: <Users className="size-10 text-purple-600" />,
+    icon: <Users className="size-10 text-[#0082CE]" />,
     title: 'User Management',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
   },
   {
-    icon: <Layers className="size-10 text-purple-600" />,
+    icon: <Layers className="size-10 text-[#0082CE]" />,
     title: 'Seamless Modules',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
   },
   {
-    icon: <TrendingUp className="size-10 text-purple-600" />,
+    icon: <TrendingUp className="size-10 text-[#0082CE]" />,
     title: 'Performance Insights',
     description:
       '  An all-in-one customer service platform that helps you balance everything your customers need to be happy.',
   },
   {
-    icon: <Lock className="size-10 text-purple-600" />,
+    icon: <Lock className="size-10 text-[#0082CE]" />,
     title: 'Secure & Reliable',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
@@ -37,10 +37,9 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className=" space-y-4 border-neutral-300 my-14">
-      <p className="landing-page-text-gradient text-lg font-medium">Features</p>
+    <section id="features" className=" space-y-4 border-neutral-300 my-18">
       <h1 className="text-4xl font-semibold">Powerful Features</h1>
-      <p className="mx-auto max-w-2xl text-lg text-neutral-500">
+      <p className="mx-auto max-w-2xl leading-6 text-lg text-neutral-500">
         Powerful, self-serve product and effective to help you manage your inventory and sales.
         Trusted by over 4,000 startups.
       </p>
@@ -72,7 +71,7 @@ const FeatureCard = ({ icon, title, description, className }: FeatureCardProps) 
     <motion.div
       whileHover={{ y: -3 }}
       transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-      className={`rounded-3xl bg-white p-8 shadow-md ring ring-neutral-400/50 hover:ring-neutral-400 ${className}`}
+      className={`rounded-xl bg-white p-8 shadow-md ring ring-neutral-400/50 hover:ring-neutral-400 ${className}`}
     >
       <div className="flex items-center gap-6">
         {icon}

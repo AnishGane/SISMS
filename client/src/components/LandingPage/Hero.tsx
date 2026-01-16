@@ -27,7 +27,7 @@ const Hero = () => {
             title="Sign Up"
             text="Sign Up"
             icon={<UserRoundPlus size={17} />}
-            className="btn rounded-md bg-[#7F56D9] text-white"
+            className="btn rounded-md px-4 shadow-md bg-[#0082CE] text-white"
           />
         </Link>
       </div>

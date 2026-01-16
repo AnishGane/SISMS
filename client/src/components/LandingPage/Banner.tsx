@@ -29,7 +29,7 @@ const Banner = () => {
       <Button
         text="Get in Touch"
         title="Get in Touch"
-        className="btn text-white px-3.5 btn-lg rounded-md bg-[#7F56D9] text-lg font-medium mx-auto"
+        className="btn text-white px-3.5 btn-lg rounded-md bg-[#0082CE] text-lg font-normal mx-auto"
       />
     </section>
   );
