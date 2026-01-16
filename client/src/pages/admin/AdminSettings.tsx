@@ -269,13 +269,13 @@ const AdminSettings = () => {
               icon={<Trash2 size={18} />}
               text="Delete Account"
               title="Delete account"
-              className="btn btn-error btn-outline text-base-100 bg-red-400"
+              className="btn bg-red-600 font-normal text-white"
               onClick={handleDelete}
             />
 
             {!isEditing ? (
               <Button
-                icon={<Pen size={18} />}
+                icon={<Pen size={16} />}
                 text="Edit"
                 title="Edit"
                 className="btn btn-primary px-3"
