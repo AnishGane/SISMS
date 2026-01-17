@@ -30,11 +30,10 @@ const SaleSchema = new mongoose.Schema(
     isReturned: { type: Boolean, default: false },
     returnDate: { type: Date },
     returnReason: { type: String },
-
-    // invoice snapshot
-    // invoiceNo: { type: String },
   },
   { _id: false } // used as subdocument in product or order; avoid extra _id unless needed
 );
 
-export default SaleSchema;
+// export default SaleSchema;
+const saleModel = mongoose.models.Sale || mongoose.model("Sale", SaleSchema);
+export default saleModel;

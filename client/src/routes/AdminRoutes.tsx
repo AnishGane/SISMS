@@ -3,7 +3,7 @@ import AdminProtectedRoutes from '../middlewares/AdminProtectedRoutes';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminProducts from '../pages/admin/AdminProducts';
 import ManageStaff from '../pages/admin/ManageStaff';
-import AdminOrders from '../pages/admin/AdminOrders';
+import AdminOrders from '../pages/admin/AdminSales';
 import AdminSettings from '../pages/admin/AdminSettings';
 import { AdminProvider } from '../context/AdminContext';
 import ProductDetail from '../components/ProductDetail';
@@ -19,7 +19,7 @@ const AdminRoutes = () => {
           <Route path="products/:id" element={<ProductDetail />} />
           <Route path="products/new" element={<AddProduct />} />
           <Route path="staffs" element={<ManageStaff />} />
-          <Route path="orders" element={<AdminOrders />} />
+          <Route path="sales" element={<AdminOrders />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>

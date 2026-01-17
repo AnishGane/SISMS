@@ -20,6 +20,7 @@ import staffRoutes from "./routes/admin/staff.route.js";
 import dashboardRoute from "./routes/admin/dashboard.route.js";
 import settingRoutes from "./routes/shared/setting.route.js";
 import notificationRoutes from "./routes/shared/notifications.route.js";
+import salesRoute from "./routes/admin/sales.route.js";
 // import suppliersRoutes from "./routes/admin/suppliers.routes.js";
 // import purchasesRoutes from "./routes/admin/purchases.routes.js";
 // import analyticsRoutes from "./routes/admin/analytics.routes.js";
@@ -41,13 +42,13 @@ app.use("/api/admin/dashboard", dashboardRoute);
 // shared
 app.use("/api/products", productRoutes);
 app.use("/api/settings", settingRoutes);
-// console.log("Notification route registered");
 app.use("/api/notifications", notificationRoutes);
 // app.use("/api/orders", orderRoutes);
 // app.use("/api/search", searchRoutes);
 
 // admin
 // app.use("/api/admin", adminRoutes); // /profile, /store, /settings
+app.use("/api/admin/sales", salesRoute);
 app.use("/api/admin/staff", staffRoutes);
 // app.use("/api/admin/suppliers", suppliersRoutes);
 // app.use("/api/admin/purchases", purchasesRoutes);

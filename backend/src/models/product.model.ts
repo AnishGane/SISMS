@@ -1,6 +1,6 @@
 // models/product.model.js
 import mongoose from "mongoose";
-import SaleSchema from "./sale.model.js";
+// import SaleSchema from "./sale.model.js";
 
 const SupplierSchema = new mongoose.Schema(
   {
@@ -46,7 +46,7 @@ const ProductSchema = new mongoose.Schema(
     supplier: SupplierSchema,
 
     // sales history snapshot array (embedded small history)
-    salesHistory: { type: [SaleSchema], default: [] },
+    // salesHistory: { type: [SaleSchema], default: [] },
 
     // analytics metadata
     avgDailySales: { type: Number, default: 0 },

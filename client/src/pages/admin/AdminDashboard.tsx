@@ -17,7 +17,7 @@ const AdminDashboard = () => {
 
       <RecentActivity />
 
-      {/* <MonthlySalesChart /> */}
+      <MonthlySalesChart />
 
       {/* <TodaysOverview /> */}
     </AdminLayout>

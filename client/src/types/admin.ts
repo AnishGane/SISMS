@@ -46,3 +46,32 @@ export interface RecentActivityData {
     avatar?: string;
   }>;
 }
+
+export type ObjectId = string;
+
+export interface StaffRef {
+  _id: ObjectId;
+  name?: string;
+}
+
+export interface Sale {
+  _id?: ObjectId; // may not exist (embedded doc)
+  orderId?: ObjectId;
+  productId: ObjectId;
+  productName: string;
+  category?: string;
+
+  qty: number;
+  price: number;
+  discount?: number;
+  tax?: number;
+  total: number;
+
+  soldBy?: ObjectId | StaffRef;
+  store: ObjectId;
+
+  date: string; // ISO string from API
+  isReturned?: boolean;
+  returnDate?: string;
+  returnReason?: string;
+}

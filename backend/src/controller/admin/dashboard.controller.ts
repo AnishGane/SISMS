@@ -4,6 +4,7 @@ import ProductModel from "../../models/product.model.js";
 import OrderModel from "../../models/order.model.js";
 
 // GET /admin/dashboard/cards Data
+// done
 export const getAdminDashboardData = async (req: Request, res: Response) => {
   try {
     const storeId = req.user.store || req.user._id; // admin = store owner
@@ -59,6 +60,7 @@ export const getAdminDashboardData = async (req: Request, res: Response) => {
 };
 
 // For bar chart in admin dashboard
+//  done
 export const getStockByCategory = async (req: Request, res: Response) => {
   try {
     const storeId = req.user.store || req.user._id;
@@ -85,6 +87,7 @@ export const getStockByCategory = async (req: Request, res: Response) => {
   }
 };
 
+// done
 export const getMonthlySalesChart = async (req: Request, res: Response) => {
   try {
     const storeId = req.user.store || req.user._id;
@@ -115,6 +118,7 @@ export const getMonthlySalesChart = async (req: Request, res: Response) => {
   }
 };
 
+// done
 export const getRecentActivity = async (req: Request, res: Response) => {
   try {
     const storeId = req.user.store || req.user._id;

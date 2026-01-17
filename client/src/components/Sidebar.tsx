@@ -24,7 +24,7 @@ const Sidebar = ({
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard' },
     { name: 'Products', icon: <PackageSearch size={20} />, path: '/admin/products' },
     { name: 'Staffs', icon: <Users size={20} />, path: '/admin/staffs' },
-    { name: 'Manage Orders', icon: <ClipboardList size={20} />, path: '/admin/orders' },
+    { name: 'Sales', icon: <ClipboardList size={20} />, path: '/admin/sales' },
     { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
   ];
 
