@@ -1,21 +1,17 @@
-import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-type Props = {
-  role?: 'admin' | 'staff' | 'any';
-};
+const PublicRoute = ({ role }: { role: string }) => {
+  const { isAuthenticated, authLoading } = useAuth();
 
-const PublicRoute: React.FC<Props> = ({ role = 'any' }) => {
-  const token = localStorage.getItem('token');
+  if (authLoading) return null;
 
-  if (token) {
-    const target =
-      role === 'admin' ? '/admin/dashboard' : role === 'staff' ? '/staff/dashboard' : '/';
-
-    return <Navigate to={target} replace />;
+  if (isAuthenticated) {
+    if (role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (role === 'staff') return <Navigate to="/staff/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  // no token -> allow access to login/register pages
   return <Outlet />;
 };
 

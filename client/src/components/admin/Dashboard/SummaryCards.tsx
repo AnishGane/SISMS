@@ -12,7 +12,7 @@ import Button from '../../ui/Button';
 import type { JSX } from 'react';
 
 const SummaryCards = () => {
-  const { dashboardData, fetchDashboardData, loading, error } = useAdmin();
+  const { dashboardData, fetchDashboardData, loading, error, storeCurrency } = useAdmin();
 
   if (loading) return <SummaryCardsSkeleton />;
   if (error) return <p className="text-error font-medium">{error}</p>;
@@ -33,36 +33,36 @@ const SummaryCards = () => {
       <div className="mt-4 mb-2 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <Card
           text="Staff"
-          icon={<Users size={22} className="text-primary-content" />}
+          icon={<Users size={22} />}
           value={dashboardData?.staffCount || 0}
           bg="bg-primary"
         />
 
         <Card
           text="Products"
-          icon={<Package2 size={22} className="text-primary-content" />}
+          icon={<Package2 size={22} />}
           value={dashboardData?.productCount || 0}
           bg="bg-secondary"
         />
 
         <Card
           text="Low Stock"
-          icon={<AlertTriangle size={22} className="text-primary-content" />}
+          icon={<AlertTriangle size={22} />}
           value={dashboardData?.lowStockCount || 0}
           bg="bg-error"
         />
 
         <Card
           text="Revenue"
-          icon={<BadgeDollarSign size={22} className="text-primary-content" />}
-          value={`$ ${dashboardData?.totalRevenue || 0}`}
+          icon={<BadgeDollarSign size={22} />}
+          value={`${storeCurrency === 'NPR' ? 'Rs' : storeCurrency === 'USD' ? '$' : '₹'} ${dashboardData?.totalRevenue || 0}`}
           bg="bg-success"
         />
 
         <Card
           text="Monthly Sales"
-          icon={<BarChart3 size={22} className="text-primary-content" />}
-          value={`$ ${dashboardData?.monthlySales || 0}`}
+          icon={<BarChart3 size={22} />}
+          value={`${storeCurrency === 'NPR' ? 'Rs' : storeCurrency === 'USD' ? '$' : '₹'} ${dashboardData?.monthlySales || 0}`}
           bg="bg-warning"
         />
       </div>
@@ -85,11 +85,11 @@ const Card = ({
   return (
     <div className="bg-base-100 border-base-300 rounded-xl border px-6 py-6 shadow-md">
       <div className="flex items-center justify-between">
-        <h3 className="text-base-content/60 text-lg font-medium">{text}</h3>
+        <h3 className="text-base-content/60 text-base font-medium">{text}</h3>
 
         {icon && <div className={`rounded-lg p-2 text-white ${bg}`}>{icon}</div>}
       </div>
-      <p className="text-2xl tracking-tight">{value}</p>
+      <p className="text-3xl tracking-tight">{value}</p>
     </div>
   );
 };

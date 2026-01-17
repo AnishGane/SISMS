@@ -2,33 +2,34 @@ import { Layers, Lock, MessageCircleMore, TrendingUp, Users } from 'lucide-react
 import { motion } from 'motion/react';
 import type { JSX } from 'react';
 
+const ICON_CLASS = 'size-10 text-[#0082CE]';
 const features = [
   {
-    icon: <MessageCircleMore className="size-10 text-[#0082CE]" />,
+    icon: <MessageCircleMore className={ICON_CLASS} />,
     title: 'Smart Analytics',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
   },
   {
-    icon: <Users className="size-10 text-[#0082CE]" />,
+    icon: <Users className={ICON_CLASS} />,
     title: 'User Management',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
   },
   {
-    icon: <Layers className="size-10 text-[#0082CE]" />,
+    icon: <Layers className={ICON_CLASS} />,
     title: 'Seamless Modules',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
   },
   {
-    icon: <TrendingUp className="size-10 text-[#0082CE]" />,
+    icon: <TrendingUp className={ICON_CLASS} />,
     title: 'Performance Insights',
     description:
       '  An all-in-one customer service platform that helps you balance everything your customers need to be happy.',
   },
   {
-    icon: <Lock className="size-10 text-[#0082CE]" />,
+    icon: <Lock className={ICON_CLASS} />,
     title: 'Secure & Reliable',
     description:
       ' Whether you have a team of 2 or 200, our shared team inboxes keep everyone on the same page and in the loop.',
@@ -37,9 +38,9 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className=" space-y-4 border-neutral-300 my-18">
+    <section id="features" className="my-18 space-y-4 border-neutral-300">
       <h1 className="text-4xl font-semibold">Powerful Features</h1>
-      <p className="mx-auto max-w-2xl leading-6 text-lg text-neutral-500">
+      <p className="mx-auto max-w-2xl text-lg leading-6 text-neutral-500">
         Powerful, self-serve product and effective to help you manage your inventory and sales.
         Trusted by over 4,000 startups.
       </p>

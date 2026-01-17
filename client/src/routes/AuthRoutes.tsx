@@ -1,13 +1,13 @@
 // src/routes/AuthRoutes.tsx
-import { Route, Routes } from "react-router-dom";
-import AdminLogin from "../pages/auth/AdminLogin";
-import StaffLogin from "../pages/auth/StaffLogin";
-import AdminRegister from "../pages/auth/AdminRegister";
-import NotFound from "../pages/shared/NotFound";
-import ForgotPassword from "../components/auth/ForgotPassword";
-import VerifyOTP from "../components/auth/VerifyOTP";
-import ResetPassword from "../components/auth/ResetPassword";
-import PublicRoute from "../middlewares/PublicRoutes";
+import { Route, Routes } from 'react-router-dom';
+import AdminLogin from '../pages/auth/AdminLogin';
+import StaffLogin from '../pages/auth/StaffLogin';
+import AdminRegister from '../pages/auth/AdminRegister';
+import NotFound from '../pages/shared/NotFound';
+import ForgotPassword from '../components/auth/ForgotPassword';
+import VerifyOTP from '../components/auth/VerifyOTP';
+import ResetPassword from '../components/auth/ResetPassword';
+import PublicRoute from '../middlewares/PublicRoutes';
 
 const AuthRoutes = () => (
   <Routes>
@@ -21,7 +21,7 @@ const AuthRoutes = () => (
     </Route>
 
     {/* Staff public pages — if logged in, PublicRoute will redirect to /staff/dashboard */}
-    <Route element={<PublicRoute role="staff" />}>
+    <Route element={<PublicRoute role='staff' />}>
       <Route path="staff/login" element={<StaffLogin />} />
       <Route path="staff/forgot-password" element={<ForgotPassword />} />
       <Route path="staff/verify-otp" element={<VerifyOTP />} />

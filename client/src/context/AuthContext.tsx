@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_PATHS } from '../utils/apiPath';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -27,6 +27,9 @@ interface AuthContextType {
   navigate: any;
   location: any;
 
+  isAuthenticated: boolean;
+  authLoading: boolean;
+
   clearUser: () => void;
   updateUser: (userData: FormData) => void;
 
@@ -51,6 +54,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [forgotPasswordLink, setForgotPasswordLink] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        setAuthLoading(false);
+        return;
+      }
+
+      try {
+        // backend must verify token
+        const res = await axiosInstance.get('/api/auth/me');
+
+        setUser(res.data.user);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+      } catch (err) {
+        // token invalid or expired
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
 
   // Function to update the user data
   const updateUser = (userData: FormData) => {
@@ -65,7 +97,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('theme');
-    // localStorage.clear();
     navigate('/admin/auth/login');
   };
 
@@ -194,6 +225,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loginAdmin,
         staffLogin,
         getLoginfromURL,
+        authLoading,
+        isAuthenticated: !!user,
       }}
     >
       {children}

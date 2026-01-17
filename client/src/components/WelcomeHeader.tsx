@@ -4,7 +4,13 @@ import NotificationBell from './admin/NotificationBell';
 
 const WelcomeHeader = ({ role }: { role: string }) => {
   const { avatarUrl } = useAdmin();
-  const username = JSON.parse(localStorage.getItem('user') || '{}').name;
+  const username = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}').name || 'User';
+    } catch {
+      return 'User';
+    }
+  })();
   return (
     <div className="text-base-content bg-base-200/50 flex w-full items-center justify-between rounded-md p-4 shadow-sm">
       <div className="flex flex-col">

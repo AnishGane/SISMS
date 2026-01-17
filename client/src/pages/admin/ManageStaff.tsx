@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPath';
-import { Edit2, Plus, Trash2, User2, UserCheck, UserPlus, UserX } from 'lucide-react';
+import { Edit2, Plus, Trash2, User2, UserCheck, UserX } from 'lucide-react';
 import StaffFormModal from '../../components/admin/ManageStaff/StaffFormModal';
 import ConfirmModal from '../../components/admin/ManageStaff/ConfirmModal';
 import Button from '../../components/ui/Button';

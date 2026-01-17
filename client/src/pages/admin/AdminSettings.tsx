@@ -26,7 +26,7 @@ const AdminSettings = () => {
     timezone: 'Asia/Kathmandu',
     isNotificationEnabled: false,
   });
-  const { loading, setLoading, confirmConfig, setConfirmConfig } = useAdmin();
+  const { loading, setLoading, confirmConfig, setConfirmConfig, setStoreCurrency } = useAdmin();
   const [isEditing, setIsEditing] = useState(false);
   const { updateUser } = useAuth();
 
@@ -41,6 +41,7 @@ const AdminSettings = () => {
       const res = await axiosInstance.get(API_PATHS.ADMIN.SETTING.GET_SETTING);
       setLoading(false);
       setForm(res.data.data);
+      setStoreCurrency(res.data.data.storeCurrency || 'NPR');
       console.log(res.data.data);
     } catch (err) {
       setLoading(false);
@@ -58,6 +59,7 @@ const AdminSettings = () => {
         if (value !== undefined && value !== null && key !== 'avatar') {
           fd.append(key, String(value));
         }
+        console.log(key, value);
       });
 
       // append avatar ONLY if new file selected
@@ -219,6 +221,7 @@ const AdminSettings = () => {
                     className="select select-bordered mt-1.5 outline-none"
                     name="storeCurrency"
                     onChange={handleChange}
+                    value={form.storeCurrency}
                     disabled={!isEditing}
                   >
                     <option value="NPR">NPR (Rs)</option>

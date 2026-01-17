@@ -39,9 +39,7 @@ const Sidebar = ({
   const { clearUser } = useAuth();
   return (
     <div
-      className={`bg-base-200 text-base-content fixed top-0 left-0 h-screen shadow-lg transition-all duration-300 ${
-        collapsed ? 'w-16' : 'w-64'
-      }`}
+      className={`bg-base-200 text-base-content fixed top-0 left-0 h-screen shadow-lg transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
     >
       {/* Header */}
       <div className="border-base-300 flex items-center justify-between border-b px-3 py-4">

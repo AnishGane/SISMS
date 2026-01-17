@@ -9,9 +9,10 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [stockCategoryData, setStockCategoryData] = useState<StockCategory[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const avatarUrl = JSON.parse(localStorage.getItem('user') || '{}').avatar;
+  const [storeCurrency, setStoreCurrency] = useState<string>('NPR');
 
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
@@ -63,6 +64,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         error,
         setError,
         fetchDashboardData,
+        storeCurrency,
+        setStoreCurrency,
       }}
     >
       {children}

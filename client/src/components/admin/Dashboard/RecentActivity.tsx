@@ -3,25 +3,45 @@ import axiosInstance from '../../../utils/axiosInstance';
 import { API_PATHS } from '../../../utils/apiPath';
 import Heading from '../../Heading';
 import { HandCoins, Package, UserRound, Warehouse } from 'lucide-react';
+import { useAdmin } from '../../../context/AdminContext';
+import type { RecentActivityData } from '../../../types/admin';
 
 type TabType = 'products' | 'stock' | 'sales' | 'staff';
 
 const RecentActivity = () => {
   const [activeTab, setActiveTab] = useState<TabType>('products');
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<RecentActivityData | null>(null);
+  const { loading, setLoading, error, setError } = useAdmin();
 
   useEffect(() => {
     const fetchActivity = async () => {
+      setLoading(true);
       try {
         const res = await axiosInstance.get(API_PATHS.ADMIN.DASHBOARD.GET_RECENT_ACTIVITY);
         setData(res.data.data);
       } catch (err) {
         console.log('Error in fetching recent activity:', err);
+        setError('Failed to load recent activity. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
     fetchActivity();
   }, []);
 
+  if (loading)
+    return (
+      <div className="bg-base-200/50 mt-8 animate-pulse rounded-xl p-6 shadow-md">
+        <div className="bg-base-300 mb-4 h-8 w-1/3 rounded"></div>
+        <div className="bg-base-300 h-64 rounded"></div>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="bg-base-200/50 mt-8 rounded-xl p-6 shadow-md">
+        <p className="text-error text-center">{error}</p>
+      </div>
+    );
   if (!data) return null;
 
   return (
@@ -49,14 +69,20 @@ const RecentActivity = () => {
           ))}
 
         {activeTab === 'stock' &&
-          data.recentStockUpdates.map((item: any) => (
-            <ActivityItem
-              key={item._id}
-              title={item.name}
-              subtitle={`Stock: ${item.stock}`}
-              date={item.updatedAt}
-              icon={<Warehouse size={18} />}
-            />
+          (data.recentStockUpdates.length > 0 ? (
+            data.recentStockUpdates.map((item: any) => (
+              <ActivityItem
+                key={item._id}
+                title={item.name}
+                subtitle={`Stock: ${item.stock}`}
+                date={item.updatedAt}
+                icon={<Warehouse size={18} />}
+              />
+            ))
+          ) : (
+            <p className="text-center text-lg font-medium text-neutral-500">
+              No recent stock updates found
+            </p>
           ))}
 
         {activeTab === 'sales' &&
@@ -77,20 +103,26 @@ const RecentActivity = () => {
           ))}
 
         {activeTab === 'staff' &&
-          data.recentStaff.map((item: any) => (
-            <ActivityItem
-              key={item._id}
-              title={item.name}
-              subtitle={item.role}
-              date={item.createdAt}
-              icon={
-                item.avatar ? (
-                  <img src={item.avatar} alt="staff avatar" className="size-8 rounded-full" />
-                ) : (
-                  <UserRound />
-                )
-              }
-            />
+          (data.recentStaff.length > 0 ? (
+            data.recentStaff.map((item: any) => (
+              <ActivityItem
+                key={item._id}
+                title={item.name}
+                subtitle={item.role}
+                date={item.createdAt}
+                icon={
+                  item.avatar ? (
+                    <img src={item.avatar} alt="staff avatar" className="size-8 rounded-full" />
+                  ) : (
+                    <UserRound />
+                  )
+                }
+              />
+            ))
+          ) : (
+            <p className="text-center text-lg font-medium text-neutral-500">
+              No recent staff found
+            </p>
           ))}
       </div>
     </div>

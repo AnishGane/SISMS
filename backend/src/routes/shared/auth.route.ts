@@ -8,6 +8,7 @@ import {
   resetPassword,
 } from "../../controller/shared/auth.controller.js";
 import upload from "../../middlewares/multer.js";
+import { auth } from "../../middlewares/auth.middleware.js";
 
 const authRoutes = express.Router();
 
@@ -23,5 +24,12 @@ authRoutes.post("/:role/verify-otp", verifyOTP);
 
 // POST /api/auth/:role/reset-password
 authRoutes.post("/:role/reset-password", resetPassword);
+
+authRoutes.get("/me", auth, (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+});
 
 export default authRoutes;
