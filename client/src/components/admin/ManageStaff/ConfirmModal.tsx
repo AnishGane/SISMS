@@ -21,12 +21,12 @@ const ConfirmModal: React.FC<Props> = ({
 
   return (
     <div className="modal modal-open backdrop-blur-sm">
-      <div className="modal-box ring-neutral ring-1">
+      <div className="modal-box ring-neutral rounded-md ring-1">
         <h3 className="text-lg font-bold">{title}</h3>
         <p className="py-4">{message}</p>
 
         <div className="modal-action">
-          <Button text="No" title="Cancel" className="btn btn-ghost" onClick={onCancel} />
+          <Button text="No" title="Cancel" className="btn px-4" onClick={onCancel} />
           <Button
             title={confirmText}
             text={confirmText}

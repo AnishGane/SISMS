@@ -32,7 +32,7 @@ const StaffFormModal: React.FC<Props> = ({
 
   return (
     <div className="modal modal-open backdrop-blur-sm">
-      <div className="modal-box ring-neutral ring-1">
+      <div className="modal-box rounded-md ring-neutral ring-1">
         <h3 className="mb-4 text-lg font-medium">{title}</h3>
 
         {error && (
@@ -95,7 +95,7 @@ const StaffFormModal: React.FC<Props> = ({
             <Button
               title="Cancel"
               text="Cancel"
-              className="btn btn-ghost px-4 font-normal"
+              className="btn px-4 font-normal"
               onClick={onClose}
             />
 

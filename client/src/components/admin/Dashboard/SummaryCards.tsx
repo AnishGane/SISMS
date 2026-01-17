@@ -42,7 +42,7 @@ const SummaryCards = () => {
           text="Products"
           icon={<Package2 size={22} />}
           value={dashboardData?.productCount || 0}
-          bg="bg-secondary"
+          bg="bg-purple-500"
         />
 
         <Card
@@ -63,7 +63,7 @@ const SummaryCards = () => {
           text="Monthly Sales"
           icon={<BarChart3 size={22} />}
           value={`${storeCurrency === 'NPR' ? 'Rs' : storeCurrency === 'USD' ? '$' : '₹'} ${dashboardData?.monthlySales || 0}`}
-          bg="bg-warning"
+          bg="bg-orange-400"
         />
       </div>
     </div>

@@ -292,7 +292,7 @@ const ActionBtn = ({
   return (
     <button
       className={
-        'btn btn-sm scale-90 rounded-full p-2 opacity-0 transition-opacity duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100 hover:bg-white'
+        'btn btn-sm hover:bg-base-300 scale-90 rounded-full p-2 opacity-0 transition-opacity duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100'
       }
       title={title}
       onClick={onClick}
