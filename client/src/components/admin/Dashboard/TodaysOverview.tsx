@@ -29,7 +29,7 @@ const TodaysOverview = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-4">Loading today’s overview...</div>;
+    return <div className="p-4">Loading todays overview...</div>;
   }
 
   if (!data) return null;

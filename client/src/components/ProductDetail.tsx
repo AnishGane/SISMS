@@ -1,52 +1,21 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import AdminLayout from '../layouts/AdminLayout';
-
-interface Supplier {
-  id?: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  contactPerson?: string;
-  notes?: string;
-}
-
-interface SalesHistory {
-  quantity: number;
-  priceAtSale: number;
-}
-
-interface Product {
-  _id: string;
-  name: string;
-  sku: string;
-  category: string;
-  description: string;
-  image?: string[];
-  price: number;
-  cost: number;
-  unit: string;
-  stock: number;
-  reorderLevel: number;
-  leadTimeDays: number;
-  location?: string;
-  supplier?: Supplier;
-  salesHistory?: SalesHistory[];
-  avgDailySales?: number;
-  lastReorderDate?: string;
-  metadata?: any;
-}
+import { useAdmin } from '../context/AdminContext';
+import toast from 'react-hot-toast';
+import ConfirmModal from './admin/ManageStaff/ConfirmModal';
+import type { IProduct } from '../types/admin';
 
 const ProductDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<IProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string>('');
+  const {confirmConfig, setConfirmConfig} = useAdmin();
 
   useEffect(() => {
     if (!id) return;
@@ -54,7 +23,7 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const res = await axiosInstance.get(API_PATHS.ADMIN.PRODUCT.GET_EACH_PRODUCT(id));
-        const p = res.data.data as Product;
+        const p = res.data.data as IProduct;
 
         setProduct(p);
         setSelectedImage(Array.isArray(p.image) && p.image.length > 0 ? p.image[0] : '');
@@ -73,8 +42,31 @@ const ProductDetail = () => {
 
   const thumbnails = product.image && product.image.length > 0 ? product.image : [];
 
+
+  const delete_product = async () => {
+    setConfirmConfig({
+      title: "Delete Product?",
+      message: `Delete the product ${product.name}? This action cannot be undone.`,
+      confirmText: "Delete",
+      action: async ()=>{
+        await axiosInstance.delete(API_PATHS.ADMIN.PRODUCT.DELETE_PRODUCT(product._id));
+        setConfirmConfig(null);
+        toast.success("Product deleted successfully");
+        navigate("/admin/products");
+      }
+    })
+  };
+
   return (
     <AdminLayout>
+        <ConfirmModal
+        open={!!confirmConfig}
+        title={confirmConfig?.title || ''}
+        message={confirmConfig?.message || ''}
+        confirmText={confirmConfig?.confirmText}
+        onCancel={() => setConfirmConfig(null)}
+        onConfirm={confirmConfig?.action || (() => {})}
+      />
       <div>
         {/* Back Button */}
         <button
@@ -112,7 +104,7 @@ const ProductDetail = () => {
                   src={img}
                   onClick={() => setSelectedImage(img)}
                   className={`h-20 w-20 cursor-pointer rounded-md border-2 object-cover ${
-                    selectedImage === img ? 'border-blue-500' : 'border-gray-300'
+                    selectedImage === img ? 'border-base-content' : 'border-transparent'
                   }`}
                 />
               ))}
@@ -169,6 +161,13 @@ const ProductDetail = () => {
                   </div>
                 </div>
               )}
+            </div>
+            <div className="flex items-center gap-4 mt-8">
+
+            {product.stock > product.reorderLevel && (
+              <button className='btn btn-primary rounded-sm font-normal cursor-pointer'>Reorder product</button>
+            )}
+            <button onClick={delete_product} className='btn bg-red-500 p-3 rounded-sm font-normal cursor-pointer' title='Delete product'><Trash2 size={20} /></button>
             </div>
           </div>
         </div>

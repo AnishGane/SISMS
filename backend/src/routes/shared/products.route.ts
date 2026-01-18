@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createProduct,
+  deleteProduct,
   getCategories,
   getEachProduct,
   getProducts,
@@ -37,5 +38,8 @@ productRoutes.get("/:id", auth, getEachProduct);
 
 //PUT /api/products/6932eea77a9e7f7e1e427952
 productRoutes.put("/:id", auth, updateProduct);
+
+//DELETE /api/products/6932eea77a9e7f7e1e427952
+productRoutes.delete("/:id", auth, allowRoles("admin"), deleteProduct);
 
 export default productRoutes;

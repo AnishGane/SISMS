@@ -46,3 +46,68 @@ export interface RecentActivityData {
     avatar?: string;
   }>;
 }
+
+export type ObjectId = string;
+
+export interface StaffRef {
+  _id: ObjectId;
+  name?: string;
+}
+
+export interface Sale {
+  _id?: ObjectId; // may not exist (embedded doc)
+  orderId?: ObjectId;
+  productId: ObjectId;
+  productName: string;
+  category?: string;
+
+  qty: number;
+  price: number;
+  discount?: number;
+  tax?: number;
+  total: number;
+
+  soldBy?: ObjectId | StaffRef;
+  store: ObjectId;
+
+  date: string; // ISO string from API
+  isReturned?: boolean;
+  returnDate?: string;
+  returnReason?: string;
+}
+
+interface Supplier {
+  id?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  contactPerson?: string;
+  notes?: string;
+}
+
+interface SalesHistory {
+  quantity: number;
+  priceAtSale: number;
+}
+
+export interface IProduct {
+  _id: string;
+  name: string;
+  sku: string;
+  category: string;
+  description: string;
+  image?: string[];
+  price: number;
+  cost: number;
+  unit: string;
+  stock: number;
+  reorderLevel: number;
+  leadTimeDays: number;
+  location?: string;
+  supplier?: Supplier;
+  salesHistory?: SalesHistory[];
+  avgDailySales?: number;
+  lastReorderDate?: string;
+  metadata?: any;
+}
