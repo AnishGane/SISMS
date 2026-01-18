@@ -515,3 +515,45 @@ export const getCategories = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const deleteProduct = async (req: AuthRequest, res: Response) => {
+  try {
+    if(!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const storeId = req.user.store || req.user._id;
+    const productId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const product = await ProductModel.findOneAndDelete({
+      _id: productId,
+      store: storeId,
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+      // data: product,
+    });
+  } catch (error) {
+    console.error("Delete Product Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete product.",
+    });
+  }
+};

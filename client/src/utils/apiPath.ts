@@ -39,9 +39,12 @@ export const API_PATHS = {
         return `/api/products/${id}`;
       },
       UPDATE_PRODUCT(id: string) {
-        return `/api/roducts/${id}`;
+        return `/api/products/${id}`;
       },
       GET_CATEGORIES: '/api/products/categories',
+      DELETE_PRODUCT(id: string) {
+        return `/api/products/${id}`;
+      }
     },
     SETTING: {
       GET_SETTING: '/api/settings/user',
