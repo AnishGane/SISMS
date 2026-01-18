@@ -87,6 +87,7 @@ interface Supplier {
 }
 
 interface SalesHistory {
+  date: Date;
   quantity: number;
   priceAtSale: number;
 }

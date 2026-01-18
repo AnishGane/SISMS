@@ -14,7 +14,9 @@ const AdminSalesHistory = () => {
         const res = await axiosInstance.get('/api/admin/sales/sales-history');
         const data = res.data.data;
         setSalesData(data);
-      } finally {
+      } catch(error){
+        console.log("Admin Sales Error: " + error);
+      }finally {
         setLoading(false);
       }
     };
@@ -22,7 +24,7 @@ const AdminSalesHistory = () => {
     loadSales();
   }, []);
 
-  // if (loading) return <p>Loading sales…</p>;
+  if (loading) return <p>Loading sales…</p>;
 
   return (
     <AdminLayout>

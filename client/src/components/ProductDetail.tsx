@@ -49,10 +49,16 @@ const ProductDetail = () => {
       message: `Delete the product ${product.name}? This action cannot be undone.`,
       confirmText: "Delete",
       action: async ()=>{
-        await axiosInstance.delete(API_PATHS.ADMIN.PRODUCT.DELETE_PRODUCT(product._id));
-        setConfirmConfig(null);
-        toast.success("Product deleted successfully");
-        navigate("/admin/products");
+        try {
+          await axiosInstance.delete(API_PATHS.ADMIN.PRODUCT.DELETE_PRODUCT(product._id));
+          setConfirmConfig(null);
+          toast.success("Product deleted successfully");
+          navigate("/admin/products");
+        } catch (error) {
+          console.error("Error deleting product:", error);
+          toast.error("Failed to delete product");
+          setConfirmConfig(null);
+        }
       }
     })
   };
@@ -164,7 +170,7 @@ const ProductDetail = () => {
             </div>
             <div className="flex items-center gap-4 mt-8">
 
-            {product.stock > product.reorderLevel && (
+            {product.stock <= product.reorderLevel && (
               <button className='btn btn-primary rounded-sm font-normal cursor-pointer'>Reorder product</button>
             )}
             <button onClick={delete_product} className='btn bg-red-500 p-3 rounded-sm font-normal cursor-pointer' title='Delete product'><Trash2 size={20} /></button>
