@@ -18,10 +18,17 @@ export async function runDailyStockCheck() {
 
     let level: AlertLevel | null = null;
 
-    if (p.stock <= reorderPoint) level = "CRITICAL";
-    else if (p.stock <= reorderPoint * 1.2) level = "LOW";
+// Base severity from stock math
+if (p.stock <= reorderPoint) level = "CRITICAL";
+else if (p.stock <= reorderPoint * 1.2) level = "LOW";
 
-    if (!level) continue;
+if (!level) continue;
+
+// ABC escalation logic
+if (p.abcClass === "A" && level === "LOW") {
+  level = "CRITICAL";
+}
+
 
     // Avoid duplicate notifications (same product + level)
     const alreadyExists = await NotificationModel.findOneAndUpdate(
