@@ -232,6 +232,7 @@ const ManageStaff = () => {
                             src={s.avatar}
                             alt={s.name}
                             className="size-8 rounded-full object-cover"
+                            loading="lazy"
                           />
                         ) : (
                           <User2 className="bg-base-300 size-8 rounded-full p-1 text-neutral-500 shadow-sm" />
