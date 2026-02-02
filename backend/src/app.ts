@@ -21,6 +21,7 @@ import dashboardRoute from "./routes/admin/dashboard.route.js";
 import settingRoutes from "./routes/shared/setting.route.js";
 import notificationRoutes from "./routes/shared/notifications.route.js";
 import salesRoute from "./routes/admin/sales.route.js";
+import analyticsRoute from "./routes/admin/analytics.route.js";
 // import suppliersRoutes from "./routes/admin/suppliers.routes.js";
 // import purchasesRoutes from "./routes/admin/purchases.routes.js";
 // import analyticsRoutes from "./routes/admin/analytics.routes.js";
@@ -50,9 +51,10 @@ app.use("/api/notifications", notificationRoutes);
 // app.use("/api/admin", adminRoutes); // /profile, /store, /settings
 app.use("/api/admin/sales", salesRoute);
 app.use("/api/admin/staff", staffRoutes);
+app.use("/api/admin/analytics", analyticsRoute);
+
 // app.use("/api/admin/suppliers", suppliersRoutes);
 // app.use("/api/admin/purchases", purchasesRoutes);
-// app.use("/api/admin/analytics", analyticsRoutes);
 
 // staff
 // app.use("/api/staff/orders", staffOrdersRoutes);

@@ -25,24 +25,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout }) => {
 
   return (
     <div
-      className={`card bg-base-200 rounded-md shadow-md transition-all hover:shadow-lg ${
-        layout === 'grid' ? 'w-full text-center' : 'flex flex-row items-center rounded-md px-1.5'
-      }`}
+      className={`card bg-base-200 rounded-md shadow-md transition-all hover:shadow-lg ${layout === 'grid' ? 'w-full text-center' : 'flex flex-row items-center rounded-md px-1.5'
+        }`}
     >
       {/* ------ IMAGE SECTION ------ */}
       {mainImage ? (
         <figure
-          className={`overflow-hidden ${
-            layout === 'grid' ? 'h-56 w-full rounded-t-xl' : 'mr-4 h-32 w-32 rounded-lg'
-          }`}
+          className={`overflow-hidden ${layout === 'grid' ? 'h-56 w-full rounded-t-xl' : 'mr-4 h-32 w-32 rounded-lg'
+            }`}
         >
           <img src={mainImage} alt={product.name} className="h-full w-full object-cover" />
         </figure>
       ) : (
         <div
-          className={`bg-base-300 text-base-content/40 flex items-center justify-center ${
-            layout === 'grid' ? 'h-56 w-full rounded-t-xl' : 'mr-4 h-32 w-32 rounded-lg'
-          }`}
+          className={`bg-base-300 text-base-content/40 flex items-center justify-center ${layout === 'grid' ? 'h-56 w-full rounded-t-xl' : 'mr-4 h-32 w-32 rounded-lg'
+            }`}
         >
           <ImageOff className="h-10 w-10" />
         </div>
@@ -76,7 +73,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout }) => {
               </p>
 
               <Link to={`/admin/products/${product._id}`}>
-                <div className="text-base-content group cursor-pointer leading-4">
+                <div className="text-base-content  group cursor-pointer leading-4">
                   <p>View Details</p>
                   <hr className="w-0 transition-all duration-200 group-hover:w-full" />
                 </div>

@@ -64,6 +64,17 @@ const ProductSchema = new mongoose.Schema(
     // soft-delete
     isActive: { type: Boolean, default: true },
 
+    abcClass: {
+      type: String,
+      enum: ["A", "B", "C"],
+      index: true,
+    },
+    annualConsumptionValue: {
+      type: Number,
+      default: 0,
+    },
+
+
     // flexible metadata for extensions
     metadata: { type: mongoose.Schema.Types.Mixed },
   },
