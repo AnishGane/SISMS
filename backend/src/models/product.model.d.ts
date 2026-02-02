@@ -47,5 +47,8 @@ export interface ProductDocument extends Document {
   store: string;
   isActive: boolean;
 
+  abcClass?: "A" | "B" | "C";
+  annualConsumptionValue?: number;
+
   metadata?: any;
 }

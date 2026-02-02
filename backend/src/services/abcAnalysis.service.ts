@@ -2,15 +2,20 @@ import ProductModel from "../models/product.model.js";
 import SaleModel from "../models/sale.model.js";
 import mongoose from "mongoose";
 
-export default async function runABCAnalysis(storeId?: string){
-// OPTIONAL: restrict to one store
-const matchStage = storeId
-? { store: new mongoose.Types.ObjectId(storeId) }
-: {};
+export default async function runABCAnalysis(storeId?: string) {
+  let storeObjectId: mongoose.Types.ObjectId | null = null;
+  if (storeId) {
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new Error(`Invalid storeId format: ${storeId}`);
+    }
+    storeObjectId = new mongoose.Types.ObjectId(storeId);
+  }
 
-// Aggregrate the sales per product
+  // OPTIONAL: restrict to one store
+  const matchStage = storeObjectId ? { store: storeObjectId } : {};
 
-const salesAgg = await SaleModel.aggregate([
+  // Aggregate the sales per product
+  const salesAgg = await SaleModel.aggregate([
     { $match: matchStage },
     {
       $group: {
@@ -22,19 +27,22 @@ const salesAgg = await SaleModel.aggregate([
 
   if (salesAgg.length === 0) return;
 
-//    maps sales for quick lookup
-const salesMap = new Map<string, number>();
-for (const s of salesAgg) {
-  salesMap.set(String(s._id), s.totalSold);
-}
+  // Maps sales for quick lookup
+  const salesMap = new Map<string, number>();
+  for (const s of salesAgg) {
+    salesMap.set(String(s._id), s.totalSold);
+  }
 
-// fetch product involved in sales
-const products = await ProductModel.find({
+  // Fetch products involved in sales (keep the same store scope)
+  const productQuery: Record<string, unknown> = {
     _id: { $in: [...salesMap.keys()] },
-  }).lean();
+  };
+  if (storeObjectId) productQuery.store = storeObjectId;
 
-//   Compute annual assumption value
-const enriched = products.map((p) => {
+  const products = await ProductModel.find(productQuery).lean();
+
+  // Compute annual consumption value
+  const enriched = products.map((p) => {
     const totalSold = salesMap.get(String(p._id)) || 0;
     const value = totalSold * p.price;
 
@@ -44,17 +52,33 @@ const enriched = products.map((p) => {
     };
   });
 
-//   Sort descending by value
-enriched.sort((a, b) => b.consumptionValue - a.consumptionValue);
+  // Sort descending by value
+  enriched.sort((a, b) => b.consumptionValue - a.consumptionValue);
 
-// Cumulative percentage + classification
-const totalValue = enriched.reduce(
-    (sum, p) => sum + p.consumptionValue,
-    0
-  );
+  // Cumulative percentage + classification
+  const totalValue = enriched.reduce((sum, p) => sum + p.consumptionValue, 0);
+
+  // Avoid division by zero; default everything to "C"
+  if (totalValue === 0) {
+    const bulkOps = enriched.map((p) => ({
+      updateOne: {
+        filter: { _id: p._id },
+        update: {
+          $set: {
+            abcClass: "C" as const,
+            annualConsumptionValue: 0,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await ProductModel.bulkWrite(bulkOps);
+    }
+    return;
+  }
 
   let cumulative = 0;
-
   const bulkOps = [];
 
   for (const p of enriched) {
@@ -70,15 +94,17 @@ const totalValue = enriched.reduce(
       updateOne: {
         filter: { _id: p._id },
         update: {
-          abcClass,
-          annualConsumptionValue: p.consumptionValue,
+          $set: {
+            abcClass,
+            annualConsumptionValue: p.consumptionValue,
+          },
         },
       },
     });
   }
 
-//   Bulk update products
-if (bulkOps.length > 0) {
+  // Bulk update products
+  if (bulkOps.length > 0) {
     await ProductModel.bulkWrite(bulkOps);
   }
 }
